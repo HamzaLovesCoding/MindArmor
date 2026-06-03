@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindArmor — Mental Health & Resilience</title>
+  <meta name="description" content="MindArmor — track your vibe, shield your communication, and explore the support vault." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+</head>
+<body>
+  <div class="app">
+    <!-- ===================== Sidebar ===================== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">🛡️</div>
+        <div class="brand-text">
+          <span class="brand-name">MindArmor</span>
+          <span class="brand-tag">resilience, built daily</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <button class="nav-item active" data-tab="vibe">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Vibe Tracker</span>
+        </button>
+        <button class="nav-item" data-tab="shield">
+          <span class="nav-icon">🗣️</span>
+          <span class="nav-label">Communication Shield</span>
+        </button>
+        <button class="nav-item" data-tab="vault">
+          <span class="nav-icon">🔐</span>
+          <span class="nav-label">The Vault</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="crisis-mini">
+          <span class="crisis-dot"></span>
+          <div>
+            <strong>In crisis?</strong>
+            <a href="tel:988">Call or text 988</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===================== Main ===================== -->
+    <main class="main">
+      <!-- ---------- Vibe Tracker ---------- -->
+      <section class="tab-panel active" id="tab-vibe">
+        <header class="page-head">
+          <div>
+            <h1>Vibe Tracker</h1>
+            <p class="subtitle">Log how today felt and the care you gave yourself.</p>
+          </div>
+        </header>
+
+        <div class="stat-strip" id="vibeStats">
+          <div class="stat-card"><span class="stat-value" data-stat="count">—</span><span class="stat-label">Entries logged</span></div>
+          <div class="stat-card"><span class="stat-value" data-stat="avg">—</span><span class="stat-label">Avg. stress</span></div>
+          <div class="stat-card"><span class="stat-value" data-stat="streak">—</span><span class="stat-label">Day streak</span></div>
+          <div class="stat-card"><span class="stat-value" data-stat="top">—</span><span class="stat-label">Top habit</span></div>
+        </div>
+
+        <div class="vibe-grid">
+          <!-- Log form -->
+          <div class="card log-card">
+            <h2 class="card-title">Today's check-in</h2>
+            <form id="vibeForm">
+              <label class="field-label" for="stress">
+                Stress level <span class="stress-readout" id="stressReadout">5</span>
+              </label>
+              <input type="range" id="stress" name="stress" min="1" max="10" value="5" class="slider" />
+              <div class="slider-scale"><span>Calm</span><span>Overwhelmed</span></div>
+
+              <label class="field-label">Self-care completed</label>
+              <div class="activity-grid" id="activityGrid">
+                <!-- populated by app.js -->
+              </div>
+
+              <label class="field-label" for="note">Note <span class="optional">(optional)</span></label>
+              <textarea id="note" name="note" rows="2" maxlength="500" placeholder="What shaped today's vibe?"></textarea>
+
+              <button type="submit" class="btn btn-primary btn-block">Save check-in</button>
+            </form>
+          </div>
+
+          <!-- History feed -->
+          <div class="card feed-card">
+            <div class="card-head-row">
+              <h2 class="card-title">History feed</h2>
+              <span class="muted" id="feedCount"></span>
+            </div>
+            <div class="feed" id="vibeFeed">
+              <!-- populated by app.js -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- Communication Shield ---------- -->
+      <section class="tab-panel" id="tab-shield">
+        <header class="page-head">
+          <div>
+            <h1>Communication Shield</h1>
+            <p class="subtitle">Five real-life scenarios reveal your conflict style.</p>
+          </div>
+        </header>
+
+        <div class="card quiz-card" id="quizCard">
+          <!-- Intro / progress / questions / result injected by app.js -->
+        </div>
+      </section>
+
+      <!-- ---------- The Vault ---------- -->
+      <section class="tab-panel" id="tab-vault">
+        <header class="page-head">
+          <div>
+            <h1>The Vault</h1>
+            <p class="subtitle">Plain-language guides to recognize, understand, and act.</p>
+          </div>
+        </header>
+
+        <!-- Emergency Support Hub -->
+        <section class="emergency-hub" aria-label="Emergency Support Hub">
+          <div class="emergency-head">
+            <span class="emergency-pulse"></span>
+            <h2>Emergency Support Hub</h2>
+          </div>
+          <p class="emergency-lede">
+            If you or someone you know may be in danger, reach out now. You deserve support, and help is free and confidential.
+          </p>
+
+          <div class="warning-block">
+            <h3>Suicide warning signs</h3>
+            <ul class="warning-list" id="warningSigns"></ul>
+          </div>
+
+          <div class="hotline-grid" id="hotlineGrid"></div>
+        </section>
+
+        <h2 class="section-heading">Education matrix</h2>
+        <div class="matrix" id="vaultMatrix">
+          <!-- expandable cards injected by app.js -->
+        </div>
+
+        <p class="disclaimer">
+          MindArmor is an educational tool and not a substitute for professional medical advice,
+          diagnosis, or treatment. If you're concerned about your health, please contact a qualified provider.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/data.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

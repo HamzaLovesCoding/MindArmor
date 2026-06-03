@@ -1,0 +1,22 @@
+{
+  "name": "mindarmor",
+  "version": "1.0.0",
+  "description": "MindArmor — a mental health & resilience dashboard with mood tracking, communication-style analysis, and an educational support vault.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "mental-health",
+    "resilience",
+    "wellbeing",
+    "dashboard"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2"
+  }
+}
