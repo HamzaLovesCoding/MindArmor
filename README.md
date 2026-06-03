@@ -45,6 +45,21 @@ Set a custom port with `PORT=4000 npm start`.
 
 > Run with auto-reload during development: `npm run dev`
 
+### 📱 View it from a phone (GitHub Codespaces)
+
+No local setup needed — open it straight from GitHub:
+
+1. On github.com, switch to the `claude/mindarmor-mental-health-app-N5SEM` branch.
+2. Tap **Code → Codespaces → Create codespace on this branch**.
+3. Wait ~1 minute. The included [`.devcontainer`](.devcontainer/devcontainer.json)
+   runs `npm install` and starts the server automatically.
+4. When you see the **"Application running on port 3000"** notification, tap
+   **Open in Browser** (or open the **Ports** tab and tap the forwarded
+   `3000` address). It opens in your mobile browser.
+
+If the server didn't start, open a terminal in the Codespace and run `npm start`
+(logs are at `/tmp/mindarmor.log`).
+
 ---
 
 ## 🧱 Tech stack
