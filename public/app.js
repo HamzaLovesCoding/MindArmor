@@ -91,19 +91,27 @@
   function renderActivityGrid() {
     const grid = $('#activityGrid');
     grid.innerHTML = D.activities.map((a) => `
-      <label class="activity-chip" data-key="${a.key}">
-        <input type="checkbox" value="${a.key}" />
+      <div class="activity-chip" data-key="${a.key}" role="checkbox" aria-checked="false" tabindex="0">
+        <input type="checkbox" value="${a.key}" tabindex="-1" aria-hidden="true" />
         <span class="chip-emoji">${a.emoji}</span>
         <span>${escapeHtml(a.label)}</span>
         <span class="chip-tick">✓</span>
-      </label>
+      </div>
     `).join('');
 
+    // Plain divs (not <label>) so only this handler toggles the checkbox —
+    // a <label> would also fire the native toggle, cancelling it out. Each
+    // chip is independent, so multiple can be selected.
     $$('.activity-chip', grid).forEach((chip) => {
       const input = $('input', chip);
-      chip.addEventListener('click', (e) => {
-        if (e.target !== input) input.checked = !input.checked;
+      const toggle = () => {
+        input.checked = !input.checked;
         chip.classList.toggle('checked', input.checked);
+        chip.setAttribute('aria-checked', String(input.checked));
+      };
+      chip.addEventListener('click', toggle);
+      chip.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
       });
     });
   }
@@ -218,6 +226,7 @@
         // Reset form
         $$('#activityGrid .activity-chip').forEach((c) => {
           c.classList.remove('checked');
+          c.setAttribute('aria-checked', 'false');
           $('input', c).checked = false;
         });
         $('#note').value = '';
