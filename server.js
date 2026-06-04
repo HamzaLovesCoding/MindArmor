@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const db = require('./db');
 
@@ -9,6 +10,24 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '64kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve the i18n bundles as a synchronous script so the UI can translate
+// before first paint (no flash of untranslated content). The canonical
+// source of truth is messages/<locale>.json at the repo root.
+const MESSAGES_DIR = path.join(__dirname, 'messages');
+const LOCALES = ['en', 'es'];
+app.get('/messages.js', (req, res) => {
+  const bundle = {};
+  for (const loc of LOCALES) {
+    try {
+      bundle[loc] = JSON.parse(fs.readFileSync(path.join(MESSAGES_DIR, `${loc}.json`), 'utf8'));
+    } catch (_) {
+      bundle[loc] = {};
+    }
+  }
+  res.type('application/javascript');
+  res.send(`window.MA_MESSAGES = ${JSON.stringify(bundle)};`);
+});
 
 // Canonical list of self-care activities the UI knows about. Used to validate
 // incoming entries so the database only ever stores known keys.

@@ -9,6 +9,55 @@
   const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
   // ---------------------------------------------------------------------
+  // i18n
+  // ---------------------------------------------------------------------
+  const MESSAGES = window.MA_MESSAGES || { en: {}, es: {} };
+  const LOCALES = ['en', 'es'];
+  const LOCALE_KEY = 'mindarmor.locale';
+  let locale = (localStorage.getItem(LOCALE_KEY) === 'es') ? 'es' : 'en';
+
+  function resolve(obj, key) {
+    return key.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+  }
+
+  // Translate a dot-path key, with {var} interpolation and en fallback.
+  function t(key, vars) {
+    let val = resolve(MESSAGES[locale], key);
+    if (val == null) val = resolve(MESSAGES.en, key);
+    if (val == null) return key;
+    if (vars && typeof val === 'string') {
+      val = val.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
+    }
+    return val;
+  }
+
+  // Resolve a key to its raw value (objects/arrays), with en fallback.
+  function tData(key) {
+    const val = resolve(MESSAGES[locale], key);
+    return val != null ? val : resolve(MESSAGES.en, key);
+  }
+
+  // Apply translations to all static [data-i18n*] elements in the DOM. If a
+  // key can't be resolved (e.g. the bundle failed to load), the existing
+  // HTML text is left untouched so the English fallback shows, never a key.
+  function applyStaticI18n() {
+    document.documentElement.lang = locale;
+    const titleVal = t('meta.title');
+    if (titleVal !== 'meta.title') document.title = titleVal;
+    const setText = (sel, attr, getKey, apply) => {
+      $$(sel).forEach((el) => {
+        const key = getKey(el);
+        const val = t(key);
+        if (val !== key) apply(el, val);
+      });
+    };
+    setText('[data-i18n]', null, (el) => el.dataset.i18n, (el, v) => { el.textContent = v; });
+    setText('[data-i18n-ph]', null, (el) => el.dataset.i18nPh, (el, v) => el.setAttribute('placeholder', v));
+    setText('[data-i18n-title]', null, (el) => el.dataset.i18nTitle, (el, v) => el.setAttribute('title', v));
+    setText('[data-i18n-aria]', null, (el) => el.dataset.i18nAria, (el, v) => el.setAttribute('aria-label', v));
+  }
+
+  // ---------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------
   async function api(path, opts) {
@@ -47,17 +96,17 @@
     const sameDay = d.toDateString() === now.toDateString();
     const yest = new Date(now); yest.setDate(now.getDate() - 1);
     const isYest = d.toDateString() === yest.toDateString();
-    const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    if (sameDay) return `Today · ${time}`;
-    if (isYest) return `Yesterday · ${time}`;
-    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` · ${time}`;
+    const time = d.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
+    if (sameDay) return `${t('stress.today')} · ${time}`;
+    if (isYest) return `${t('stress.yesterday')} · ${time}`;
+    return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' }) + ` · ${time}`;
   }
 
-  // Map a 1–10 stress level to a color + label.
+  // Map a 1–10 stress level to a color + severity key (label resolved via i18n).
   function stressMeta(level) {
-    if (level <= 3) return { color: '#34d399', label: 'Low', bg: 'rgba(52,211,153,0.15)', fg: '#9af0cf' };
-    if (level <= 6) return { color: '#fbbf24', label: 'Moderate', bg: 'rgba(251,191,36,0.15)', fg: '#fcdf9b' };
-    return { color: '#fb7185', label: 'High', bg: 'rgba(251,113,133,0.15)', fg: '#ffb3c0' };
+    if (level <= 3) return { color: '#34d399', key: 'low', bg: 'rgba(52,211,153,0.15)', fg: '#9af0cf' };
+    if (level <= 6) return { color: '#fbbf24', key: 'moderate', bg: 'rgba(251,191,36,0.15)', fg: '#fcdf9b' };
+    return { color: '#fb7185', key: 'high', bg: 'rgba(251,113,133,0.15)', fg: '#ffb3c0' };
   }
 
   // ---------------------------------------------------------------------
@@ -94,7 +143,7 @@
       <div class="activity-chip" data-key="${a.key}" role="checkbox" aria-checked="false" tabindex="0">
         <input type="checkbox" value="${a.key}" tabindex="-1" aria-hidden="true" />
         <span class="chip-emoji">${a.emoji}</span>
-        <span>${escapeHtml(a.label)}</span>
+        <span>${escapeHtml(t('activities.' + a.key))}</span>
         <span class="chip-tick">✓</span>
       </div>
     `).join('');
@@ -122,7 +171,7 @@
     grid.innerHTML = D.moods.map((m) => `
       <div class="activity-chip mood-chip" data-key="${m.key}" role="radio" aria-checked="false" tabindex="0">
         <span class="chip-emoji">${m.emoji}</span>
-        <span>${escapeHtml(m.label)}</span>
+        <span>${escapeHtml(t('moods.' + m.key))}</span>
       </div>
     `).join('');
 
@@ -171,7 +220,7 @@
 
   function activityLabel(key) {
     const a = D.activities.find((x) => x.key === key);
-    return a ? `${a.emoji} ${a.label}` : key;
+    return a ? `${a.emoji} ${t('activities.' + key)}` : key;
   }
 
   function moodMeta(key) {
@@ -180,10 +229,11 @@
 
   function renderFeed(entries) {
     const feed = $('#stressFeed');
-    $('#feedCount').textContent = entries.length ? `${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}` : '';
+    const word = entries.length === 1 ? t('stress.entry') : t('stress.entries');
+    $('#feedCount').textContent = entries.length ? `${entries.length} ${word}` : '';
 
     if (!entries.length) {
-      feed.innerHTML = `<div class="feed-empty">No check-ins yet.<br>Log today's check-in to start your history.</div>`;
+      feed.innerHTML = `<div class="feed-empty">${escapeHtml(t('stress.emptyLine1'))}<br>${escapeHtml(t('stress.emptyLine2'))}</div>`;
       return;
     }
 
@@ -191,11 +241,11 @@
       const meta = stressMeta(e.stressLevel);
       const tags = e.activities.length
         ? `<div class="feed-tags">${e.activities.map((k) => `<span class="feed-tag">${escapeHtml(activityLabel(k))}</span>`).join('')}</div>`
-        : `<div class="feed-tags"><span class="feed-tag" style="opacity:.6">No activities logged</span></div>`;
+        : `<div class="feed-tags"><span class="feed-tag" style="opacity:.6">${escapeHtml(t('stress.noActivities'))}</span></div>`;
       const note = e.note ? `<div class="feed-note">“${escapeHtml(e.note)}”</div>` : '';
       const mood = moodMeta(e.mood);
       const moodBadge = mood
-        ? `<span class="feed-badge feed-mood">${mood.emoji} ${escapeHtml(mood.label)}</span>`
+        ? `<span class="feed-badge feed-mood">${mood.emoji} ${escapeHtml(t('moods.' + mood.key))}</span>`
         : '';
       return `
         <div class="feed-item" data-id="${e.id}">
@@ -203,13 +253,13 @@
           <div class="feed-body">
             <div class="feed-top">
               <span class="feed-date">${formatDate(e.createdAt)}</span>
-              <span class="feed-badge" style="background:${meta.bg};color:${meta.fg}">${meta.label} stress</span>
+              <span class="feed-badge" style="background:${meta.bg};color:${meta.fg}">${escapeHtml(t('stress.badge.' + meta.key))}</span>
               ${moodBadge}
             </div>
             ${tags}
             ${note}
           </div>
-          <button class="feed-del" title="Delete entry" aria-label="Delete entry">🗑</button>
+          <button class="feed-del" title="${escapeHtml(t('stress.delete'))}" aria-label="${escapeHtml(t('stress.delete'))}">🗑</button>
         </div>`;
     }).join('');
 
@@ -218,7 +268,7 @@
         const id = btn.closest('.feed-item').dataset.id;
         try {
           await api(`/api/stress/${id}`, { method: 'DELETE' });
-          notify('Entry removed');
+          notify(t('stress.removed'));
           loadStress();
         } catch (err) {
           notify(err.message, true);
@@ -231,10 +281,13 @@
     try {
       const s = await api('/api/stress/stats');
       const set = (k, v) => { const el = $(`[data-stat="${k}"]`); if (el) el.textContent = v; };
-      set('count', s.count);
-      set('avg', s.avgStress == null ? '—' : s.avgStress);
-      set('streak', s.currentStreak + (s.currentStreak === 1 ? ' day' : ' days'));
-      set('top', s.topActivity ? activityLabel(s.topActivity).split(' ')[0] : '—');
+      set('count', Number(s.count).toLocaleString(locale));
+      set('avg', s.avgStress == null ? '—' : Number(s.avgStress).toLocaleString(locale));
+      const streakWord = s.currentStreak === 1 ? t('stress.streakDay') : t('stress.streakDays');
+      set('streak', `${s.currentStreak} ${streakWord}`);
+      // Top habit is shown as its emoji (language-neutral).
+      const top = s.topActivity ? (D.activities.find((a) => a.key === s.topActivity) || {}).emoji : null;
+      set('top', top || '—');
     } catch (_) { /* non-critical */ }
   }
 
@@ -244,7 +297,7 @@
       renderFeed(entries);
       renderStats();
     } catch (err) {
-      notify('Could not load history', true);
+      notify(t('stress.loadError'), true);
     }
   }
 
@@ -306,7 +359,7 @@
     } else if (level >= 7) {
       showResetPrompt();
     } else {
-      notify('Check-in saved ✓');
+      notify(t('stress.saved'));
     }
   }
 
@@ -328,6 +381,7 @@
   let modalOpen = false;
   let activeCleanup = null;
   let lastTrigger = null;
+  let currentExerciseKey = null;
 
   const prefersReducedMotion = () =>
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -362,9 +416,9 @@
     grid.innerHTML = D.resetKit.map((ex) => `
       <div class="card reset-card">
         <div class="reset-icon">${ex.icon}</div>
-        <h2 class="reset-title">${escapeHtml(ex.title)}</h2>
-        <p class="reset-desc">${escapeHtml(ex.desc)}</p>
-        <button class="btn btn-primary reset-start" data-ex="${ex.key}">Start</button>
+        <h2 class="reset-title">${escapeHtml(t('reset.cards.' + ex.key + '.title'))}</h2>
+        <p class="reset-desc">${escapeHtml(t('reset.cards.' + ex.key + '.desc'))}</p>
+        <button class="btn btn-primary reset-start" data-ex="${ex.key}">${escapeHtml(t('common.start'))}</button>
       </div>`).join('');
 
     $$('.reset-start', grid).forEach((btn) => {
@@ -382,8 +436,10 @@
   function openExercise(key, trigger) {
     const builder = EXERCISES[key];
     if (!builder) return;
-    lastTrigger = trigger || null;
+    if (trigger !== undefined) lastTrigger = trigger || null;
+    currentExerciseKey = key;
     const stage = $('#exerciseStage');
+    if (typeof activeCleanup === 'function') activeCleanup();
     stage.innerHTML = '';
     activeCleanup = builder(stage) || null;
     $('#exerciseOverlay').hidden = false;
@@ -395,6 +451,7 @@
   function closeExercise() {
     if (typeof activeCleanup === 'function') activeCleanup();
     activeCleanup = null;
+    currentExerciseKey = null;
     $('#exerciseOverlay').hidden = true;
     $('#exerciseStage').innerHTML = '';
     document.body.classList.remove('modal-open');
@@ -406,34 +463,35 @@
   function exBox(stage) {
     const reduce = prefersReducedMotion();
     const phases = [
-      { label: 'Breathe in',  dur: 4000, from: 0.6, to: 1.0 },
-      { label: 'Hold',        dur: 4000, from: 1.0, to: 1.0 },
-      { label: 'Breathe out', dur: 4000, from: 1.0, to: 0.6 },
-      { label: 'Hold',        dur: 4000, from: 0.6, to: 0.6 },
+      { key: 'reset.box.in',   dur: 4000, from: 0.6, to: 1.0 },
+      { key: 'reset.box.hold', dur: 4000, from: 1.0, to: 1.0 },
+      { key: 'reset.box.out',  dur: 4000, from: 1.0, to: 0.6 },
+      { key: 'reset.box.hold', dur: 4000, from: 0.6, to: 0.6 },
     ];
     let goal = 4;
     let cycle = 1;
     let phaseIdx = 0;
     let elapsed = 0;
     let status = 'idle'; // idle | running | paused | done
+    const cycleText = () => t('reset.box.cycle', { n: cycle, goal });
 
     stage.innerHTML = `
       <div class="ex ex-box">
-        <h2 class="ex-title">Box Breathing</h2>
+        <h2 class="ex-title">${escapeHtml(t('reset.cards.box.title'))}</h2>
         <div class="box-wrap">
           <div class="box-square${reduce ? ' static' : ''}" id="boxSquare">
-            <span class="box-phase" id="boxPhase">Ready</span>
+            <span class="box-phase" id="boxPhase">${escapeHtml(t('reset.box.ready'))}</span>
           </div>
         </div>
         <div class="box-bar" id="boxBar"${reduce ? '' : ' hidden'}>
           <div class="box-bar-fill" id="boxBarFill"></div>
         </div>
         <div class="ex-counter">
-          <button class="counter-btn" id="boxMinus" aria-label="Fewer cycles">−</button>
-          <span id="boxCounter">Cycle 1 of ${goal}</span>
-          <button class="counter-btn" id="boxPlus" aria-label="More cycles">+</button>
+          <button class="counter-btn" id="boxMinus" aria-label="−">−</button>
+          <span id="boxCounter">${escapeHtml(cycleText())}</span>
+          <button class="counter-btn" id="boxPlus" aria-label="+">+</button>
         </div>
-        <button class="btn btn-primary ex-action" id="boxToggle">Start</button>
+        <button class="btn btn-primary ex-action" id="boxToggle">${escapeHtml(t('common.start'))}</button>
       </div>`;
 
     const square = $('#boxSquare', stage);
@@ -448,7 +506,7 @@
 
     function setGoal(next) {
       goal = Math.max(1, Math.min(8, next));
-      counterEl.textContent = `Cycle ${cycle} of ${goal}`;
+      counterEl.textContent = cycleText();
     }
     minus.addEventListener('click', () => { if (status === 'idle') setGoal(goal - 1); });
     plus.addEventListener('click', () => { if (status === 'idle') setGoal(goal + 1); });
@@ -457,8 +515,8 @@
       elapsed += dt;
       const ph = phases[phaseIdx];
       const p = Math.min(elapsed / ph.dur, 1);
-      phaseEl.textContent = ph.label;
-      counterEl.textContent = `Cycle ${cycle} of ${goal}`;
+      phaseEl.textContent = t(ph.key);
+      counterEl.textContent = cycleText();
       if (reduce) {
         barFill.style.width = `${p * 100}%`;
       } else {
@@ -481,8 +539,8 @@
       stage.innerHTML = `
         <div class="ex ex-done">
           <div class="ex-done-emoji">🌿</div>
-          <h2 class="ex-title">Nice work — how do you feel?</h2>
-          <button class="btn btn-primary" id="boxDone">Back to toolkit</button>
+          <h2 class="ex-title">${escapeHtml(t('reset.box.done'))}</h2>
+          <button class="btn btn-primary" id="boxDone">${escapeHtml(t('common.backToToolkit'))}</button>
         </div>`;
       $('#boxDone', stage).addEventListener('click', closeExercise);
     }
@@ -490,13 +548,13 @@
     toggle.addEventListener('click', () => {
       if (status === 'idle' || status === 'paused') {
         status = 'running';
-        toggle.textContent = 'Pause';
+        toggle.textContent = t('common.pause');
         minus.disabled = true;
         plus.disabled = true;
         ticker.start();
       } else if (status === 'running') {
         status = 'paused';
-        toggle.textContent = 'Resume';
+        toggle.textContent = t('common.resume');
         ticker.pause();
       }
     });
@@ -523,16 +581,18 @@
 
     function renderStep() {
       const s = steps[idx];
-      const noun = s.n === 1 ? 'thing' : 'things';
+      const noun = t(s.n === 1 ? 'reset.grounding.thing' : 'reset.grounding.things');
+      const verb = t('reset.grounding.' + s.verb);
+      const prompt = t('reset.grounding.prompt', { n: s.n, noun, verb });
       stage.innerHTML = `
         <div class="ex ex-ground">
           ${dots()}
           <div class="gradient-text ground-number">${s.n}</div>
-          <p class="ground-prompt">${s.n} ${noun} you can <strong>${s.verb}</strong></p>
-          <textarea class="ground-input" id="groundInput" rows="3" placeholder="Optional — name them here…"></textarea>
+          <p class="ground-prompt">${escapeHtml(prompt)}</p>
+          <textarea class="ground-input" id="groundInput" rows="3" placeholder="${escapeHtml(t('reset.grounding.placeholder'))}"></textarea>
           <div class="ex-nav">
-            <button class="btn btn-ghost" id="groundBack"${idx === 0 ? ' disabled' : ''}>Back</button>
-            <button class="btn btn-primary" id="groundNext">${idx < steps.length - 1 ? 'Next' : 'Finish'}</button>
+            <button class="btn btn-ghost" id="groundBack"${idx === 0 ? ' disabled' : ''}>${escapeHtml(t('common.back'))}</button>
+            <button class="btn btn-primary" id="groundNext">${escapeHtml(idx < steps.length - 1 ? t('common.next') : t('common.finish'))}</button>
           </div>
         </div>`;
       const input = $('#groundInput', stage);
@@ -548,8 +608,8 @@
       stage.innerHTML = `
         <div class="ex ex-done">
           <div class="ex-done-emoji">🌎</div>
-          <h2 class="ex-title">You're here. You're grounded.</h2>
-          <button class="btn btn-primary" id="groundDone">Back to toolkit</button>
+          <h2 class="ex-title">${escapeHtml(t('reset.grounding.done'))}</h2>
+          <button class="btn btn-primary" id="groundDone">${escapeHtml(t('common.backToToolkit'))}</button>
         </div>`;
       $('#groundDone', stage).addEventListener('click', closeExercise);
     }
@@ -563,15 +623,18 @@
     const regions = ['feet', 'calves', 'thighs', 'hands', 'arms', 'shoulders', 'face'];
     const phases = [];
     regions.forEach((r) => {
-      phases.push({ region: r, label: `Tense your ${r}`, dur: 5000 });
-      phases.push({ region: r, label: 'Release', dur: 10000 });
+      phases.push({ region: r, kind: 'tense', dur: 5000 });
+      phases.push({ region: r, kind: 'release', dur: 10000 });
     });
+    const regionName = (r) => t('reset.pmr.' + r);
+    const actionLabel = (ph) => (ph.kind === 'tense'
+      ? t('reset.pmr.tense', { region: regionName(ph.region) })
+      : t('reset.pmr.release'));
 
     let idx = 0;
     let elapsed = 0;
     const R = 52;
     const C = 2 * Math.PI * R;
-    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
     stage.innerHTML = `
       <div class="ex ex-pmr">
@@ -590,9 +653,9 @@
           </svg>
           <div class="pmr-center"><span id="pmrSeconds">5</span></div>
         </div>
-        <div class="gradient-text pmr-region" id="pmrRegion">Feet</div>
-        <div class="pmr-action" id="pmrAction">Tense your feet</div>
-        <button class="btn btn-primary ex-action" id="pmrToggle">Pause</button>
+        <div class="gradient-text pmr-region" id="pmrRegion">${escapeHtml(regionName('feet'))}</div>
+        <div class="pmr-action" id="pmrAction">${escapeHtml(actionLabel(phases[0]))}</div>
+        <button class="btn btn-primary ex-action" id="pmrToggle">${escapeHtml(t('common.pause'))}</button>
       </div>`;
 
     const ring = $('#pmrRing', stage);
@@ -607,8 +670,8 @@
       const p = Math.min(elapsed / ph.dur, 1);
       ring.style.strokeDashoffset = `${C * p}`;
       secondsEl.textContent = Math.max(0, Math.ceil((ph.dur - elapsed) / 1000));
-      regionEl.textContent = cap(ph.region);
-      actionEl.textContent = ph.label;
+      regionEl.textContent = regionName(ph.region);
+      actionEl.textContent = actionLabel(ph);
       if (elapsed >= ph.dur) {
         idx += 1;
         if (idx >= phases.length) { finish(); return; }
@@ -621,15 +684,15 @@
       stage.innerHTML = `
         <div class="ex ex-done">
           <div class="ex-done-emoji">😌</div>
-          <h2 class="ex-title">Take a slow breath. You're done.</h2>
-          <button class="btn btn-primary" id="pmrDone">Back to toolkit</button>
+          <h2 class="ex-title">${escapeHtml(t('reset.pmr.done'))}</h2>
+          <button class="btn btn-primary" id="pmrDone">${escapeHtml(t('common.backToToolkit'))}</button>
         </div>`;
       $('#pmrDone', stage).addEventListener('click', closeExercise);
     }
 
     toggle.addEventListener('click', () => {
-      if (ticker.running) { ticker.pause(); toggle.textContent = 'Resume'; }
-      else { ticker.start(); toggle.textContent = 'Pause'; }
+      if (ticker.running) { ticker.pause(); toggle.textContent = t('common.resume'); }
+      else { ticker.start(); toggle.textContent = t('common.pause'); }
     });
 
     ticker.start(); // auto-advances through all regions
@@ -640,12 +703,12 @@
   function exUrge(stage) {
     const reduce = prefersReducedMotion();
     const urges = [
-      { key: 'substance', emoji: '🚬', label: 'Substance' },
-      { key: 'phone',     emoji: '📱', label: 'Phone/scroll' },
-      { key: 'food',      emoji: '🍪', label: 'Food' },
-      { key: 'lashout',   emoji: '💢', label: 'Lash out' },
-      { key: 'isolate',   emoji: '😢', label: 'Isolate' },
-      { key: 'other',     emoji: '✋', label: 'Something else' },
+      { key: 'substance', emoji: '🚬' },
+      { key: 'phone',     emoji: '📱' },
+      { key: 'food',      emoji: '🍪' },
+      { key: 'lashout',   emoji: '💢' },
+      { key: 'isolate',   emoji: '😢' },
+      { key: 'other',     emoji: '✋' },
     ];
     let selectedUrge = '';
     let startStrength = 7;
@@ -663,9 +726,9 @@
       stage.innerHTML = `
         <div class="ex ex-urge">
           <div class="urge-emoji">🌊</div>
-          <h2 class="ex-title">Urges are like waves.</h2>
-          <p class="urge-body">They rise, peak, and fall — usually within minutes. You don't have to fight it. Just notice it.</p>
-          <button class="btn btn-primary ex-action" id="urgeBegin">Begin</button>
+          <h2 class="ex-title">${escapeHtml(t('reset.urge.introTitle'))}</h2>
+          <p class="urge-body">${escapeHtml(t('reset.urge.introBody'))}</p>
+          <button class="btn btn-primary ex-action" id="urgeBegin">${escapeHtml(t('common.begin'))}</button>
         </div>`;
       introTimer = setTimeout(step2, 15000);
       $('#urgeBegin', stage).addEventListener('click', step2);
@@ -676,19 +739,19 @@
       clearTimers();
       stage.innerHTML = `
         <div class="ex ex-urge">
-          <h2 class="ex-title">What are you feeling pulled toward?</h2>
+          <h2 class="ex-title">${escapeHtml(t('reset.urge.nameTitle'))}</h2>
           <div class="urge-chips" id="urgeChips">
             ${urges.map((u) => `
               <div class="activity-chip urge-chip" data-key="${u.key}" role="radio" aria-checked="false" tabindex="0">
-                <span class="chip-emoji">${u.emoji}</span><span>${escapeHtml(u.label)}</span>
+                <span class="chip-emoji">${u.emoji}</span><span>${escapeHtml(t('reset.urge.chips.' + u.key))}</span>
               </div>`).join('')}
           </div>
           <label class="field-label urge-strength-label" for="urgeStart">
-            How strong is the urge right now? <span class="stress-readout" id="urgeStartReadout">7</span>
+            ${escapeHtml(t('reset.urge.strengthLabel'))} <span class="stress-readout" id="urgeStartReadout">7</span>
           </label>
           <input type="range" id="urgeStart" min="1" max="10" value="7" class="slider" />
-          <div class="slider-scale"><span>Mild</span><span>Intense</span></div>
-          <button class="btn btn-primary ex-action" id="urgeSurf">Surf it</button>
+          <div class="slider-scale"><span>${escapeHtml(t('reset.urge.mild'))}</span><span>${escapeHtml(t('reset.urge.intense'))}</span></div>
+          <button class="btn btn-primary ex-action" id="urgeSurf">${escapeHtml(t('reset.urge.surf'))}</button>
         </div>`;
 
       const chips = $$('.urge-chip', stage);
@@ -719,20 +782,20 @@
       let elapsed = 0;
 
       const phaseText = (ms) => (ms < 60000
-        ? 'The wave is rising. Just watch.'
+        ? t('reset.urge.phaseRise')
         : ms < 90000
-          ? 'This is the peak. Stay with it.'
-          : "It's already passing. Notice.");
+          ? t('reset.urge.phasePeak')
+          : t('reset.urge.phaseFall'));
       const mmss = (ms) => {
         const s = Math.max(0, Math.ceil((TOTAL - ms) / 1000));
         return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
       };
 
       const nav = `
-        <p class="urge-phase" id="urgePhase">The wave is rising. Just watch.</p>
+        <p class="urge-phase" id="urgePhase">${escapeHtml(t('reset.urge.phaseRise'))}</p>
         <div class="ex-nav-row">
-          <button class="btn btn-primary ex-action" id="urgeToggle">Pause</button>
-          <button type="button" class="btn-skip" id="urgeSkip">Skip</button>
+          <button class="btn btn-primary ex-action" id="urgeToggle">${escapeHtml(t('common.pause'))}</button>
+          <button type="button" class="btn-skip" id="urgeSkip">${escapeHtml(t('common.skip'))}</button>
         </div>`;
 
       if (reduce) {
@@ -803,8 +866,8 @@
       });
 
       toggle.addEventListener('click', () => {
-        if (ticker && ticker.running) { ticker.pause(); toggle.textContent = 'Resume'; }
-        else if (ticker) { ticker.start(); toggle.textContent = 'Pause'; }
+        if (ticker && ticker.running) { ticker.pause(); toggle.textContent = t('common.resume'); }
+        else if (ticker) { ticker.start(); toggle.textContent = t('common.pause'); }
       });
       $('#urgeSkip', stage).addEventListener('click', () => { clearTimers(); step4(); });
 
@@ -817,20 +880,20 @@
       clearTimers();
       stage.innerHTML = `
         <div class="ex ex-urge">
-          <h2 class="ex-title">How strong is the urge now?</h2>
+          <h2 class="ex-title">${escapeHtml(t('reset.urge.closeTitle'))}</h2>
           <div class="gradient-text urge-now" id="urgeNow">${startStrength}</div>
           <input type="range" id="urgeEnd" min="1" max="10" value="${startStrength}" class="slider" />
-          <div class="slider-scale"><span>Mild</span><span>Intense</span></div>
-          <p class="urge-compare" id="urgeCompare">Started at ${startStrength}, now at ${startStrength}</p>
-          <p class="urge-closing">Urges pass. You stayed.</p>
-          <button class="btn btn-primary ex-action" id="urgeDone">Done</button>
+          <div class="slider-scale"><span>${escapeHtml(t('reset.urge.mild'))}</span><span>${escapeHtml(t('reset.urge.intense'))}</span></div>
+          <p class="urge-compare" id="urgeCompare">${escapeHtml(t('reset.urge.compare', { start: startStrength, now: startStrength }))}</p>
+          <p class="urge-closing">${escapeHtml(t('reset.urge.closing'))}</p>
+          <button class="btn btn-primary ex-action" id="urgeDone">${escapeHtml(t('common.done'))}</button>
         </div>`;
       const slider = $('#urgeEnd', stage);
       const now = $('#urgeNow', stage);
       const compare = $('#urgeCompare', stage);
       slider.addEventListener('input', () => {
         now.textContent = slider.value;
-        compare.textContent = `Started at ${startStrength}, now at ${slider.value}`;
+        compare.textContent = t('reset.urge.compare', { start: startStrength, now: slider.value });
       });
       $('#urgeDone', stage).addEventListener('click', closeExercise);
     }
@@ -844,41 +907,45 @@
   // =====================================================================
   function renderVault() {
     // Warning signs
-    $('#warningSigns').innerHTML = D.warningSigns
+    $('#warningSigns').innerHTML = (tData('resources.warnings') || [])
       .map((s) => `<li>${escapeHtml(s)}</li>`).join('');
 
-    // Hotlines
+    // Hotlines (hrefs are structural; text is translated by id)
     $('#hotlineGrid').innerHTML = D.hotlines.map((h) => {
+      const m = tData('resources.hotlines.' + h.id) || {};
       const actions = [];
-      if (h.call) actions.push(`<a class="hotline-btn call" href="${h.call}">${escapeHtml(h.callLabel || 'Call')}</a>`);
-      if (h.text) actions.push(`<a class="hotline-btn text" href="${h.text}">${escapeHtml(h.textLabel || 'Text')}</a>`);
-      if (h.link) actions.push(`<a class="hotline-btn text" href="${h.link}" target="_blank" rel="noopener">${escapeHtml(h.linkLabel || 'Open')}</a>`);
+      if (h.call) actions.push(`<a class="hotline-btn call" href="${h.call}">${escapeHtml(m.callLabel || 'Call')}</a>`);
+      if (h.text) actions.push(`<a class="hotline-btn text" href="${h.text}">${escapeHtml(m.textLabel || 'Text')}</a>`);
+      if (h.link) actions.push(`<a class="hotline-btn text" href="${h.link}" target="_blank" rel="noopener">${escapeHtml(m.linkLabel || 'Open')}</a>`);
       return `
         <div class="hotline">
-          <div class="hotline-name">${escapeHtml(h.name)}</div>
-          <div class="hotline-desc">${escapeHtml(h.desc)}</div>
+          <div class="hotline-name">${escapeHtml(m.name || h.id)}</div>
+          <div class="hotline-desc">${escapeHtml(m.desc || '')}</div>
           <div class="hotline-actions">${actions.join('')}</div>
         </div>`;
     }).join('');
 
     // Education matrix
     const matrix = $('#vaultMatrix');
-    matrix.innerHTML = D.vault.map((c) => `
+    matrix.innerHTML = D.vault.map((c) => {
+      const card = tData('resources.cards.' + c.id) || {};
+      return `
       <div class="matrix-card" data-id="${c.id}">
         <div class="matrix-summary" role="button" tabindex="0" aria-expanded="false">
           <div class="matrix-icon">${c.icon}</div>
           <div class="matrix-titles">
-            <h3>${escapeHtml(c.title)}</h3>
-            <p>${escapeHtml(c.subtitle)}</p>
+            <h3>${escapeHtml(card.title || '')}</h3>
+            <p>${escapeHtml(card.subtitle || '')}</p>
           </div>
           <span class="matrix-chevron">▼</span>
         </div>
         <div class="matrix-body">
           <div class="matrix-body-inner">
-            ${c.sections.map(renderVaultSection).join('')}
+            ${(card.sections || []).map(renderVaultSection).join('')}
           </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     $$('.matrix-card', matrix).forEach((card) => {
       const summary = $('.matrix-summary', card);
@@ -902,9 +969,58 @@
   }
 
   // ---------------------------------------------------------------------
+  // Language toggle
+  // ---------------------------------------------------------------------
+  function updateLangToggle() {
+    $$('.lang-btn').forEach((b) => b.classList.toggle('active', b.dataset.locale === locale));
+  }
+
+  // Re-render every dynamic region in the new language, preserving in-progress
+  // form selections, and re-render an open modal exercise in place.
+  function rerenderDynamic() {
+    const selActivities = $$('#activityGrid input:checked').map((i) => i.value);
+    const selMood = selectedMood();
+
+    applyStaticI18n();
+    renderActivityGrid();
+    renderMoodGrid();
+    renderResetKit();
+    renderVault();
+    loadStress();
+
+    selActivities.forEach((k) => {
+      const chip = $(`#activityGrid .activity-chip[data-key="${k}"]`);
+      if (chip) { chip.classList.add('checked'); chip.setAttribute('aria-checked', 'true'); $('input', chip).checked = true; }
+    });
+    if (selMood) {
+      const chip = $(`#moodGrid .mood-chip[data-key="${selMood}"]`);
+      if (chip) { chip.classList.add('checked'); chip.setAttribute('aria-checked', 'true'); }
+    }
+
+    if (modalOpen && currentExerciseKey) openExercise(currentExerciseKey);
+    updateLangToggle();
+  }
+
+  function setLocale(next) {
+    if (!LOCALES.includes(next) || next === locale) return;
+    locale = next;
+    try { localStorage.setItem(LOCALE_KEY, locale); } catch (_) { /* ignore */ }
+    rerenderDynamic();
+  }
+
+  function initLangToggle() {
+    $$('.lang-btn').forEach((btn) => {
+      btn.addEventListener('click', () => setLocale(btn.dataset.locale));
+    });
+    updateLangToggle();
+  }
+
+  // ---------------------------------------------------------------------
   // Boot
   // ---------------------------------------------------------------------
   function init() {
+    applyStaticI18n();
+    initLangToggle();
     initTabs();
     renderActivityGrid();
     renderMoodGrid();

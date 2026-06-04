@@ -17,35 +17,39 @@
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-text">
-          <span class="brand-name">MindArmor</span>
-          <span class="brand-tag">resilience, built daily</span>
+          <span class="brand-name" data-i18n="brand.name">MindArmor</span>
+          <span class="brand-tag" data-i18n="brand.tagline">resilience, built daily</span>
         </div>
       </div>
 
       <nav class="nav" aria-label="Primary">
-        <button class="nav-item active" data-tab="stress" title="Stress Tracker — press 1">
+        <button class="nav-item active" data-tab="stress" data-i18n-title="nav.stressTitle" title="Stress Tracker — press 1">
           <span class="nav-icon">📊</span>
-          <span class="nav-label">Stress Tracker</span>
+          <span class="nav-label" data-i18n="nav.stress">Stress Tracker</span>
           <kbd class="nav-key">1</kbd>
         </button>
-        <button class="nav-item" data-tab="reset" title="Reset Kit — press 2">
+        <button class="nav-item" data-tab="reset" data-i18n-title="nav.resetTitle" title="Reset Kit — press 2">
           <span class="nav-icon">🌬️</span>
-          <span class="nav-label">Reset Kit</span>
+          <span class="nav-label" data-i18n="nav.reset">Reset Kit</span>
           <kbd class="nav-key">2</kbd>
         </button>
-        <button class="nav-item" data-tab="resources" title="Resources — press 3">
+        <button class="nav-item" data-tab="resources" data-i18n-title="nav.resourcesTitle" title="Resources — press 3">
           <span class="nav-icon">📚</span>
-          <span class="nav-label">Resources</span>
+          <span class="nav-label" data-i18n="nav.resources">Resources</span>
           <kbd class="nav-key">3</kbd>
         </button>
       </nav>
 
       <div class="sidebar-footer">
+        <div class="lang-toggle" role="group" data-i18n-aria="lang.label" aria-label="Language">
+          <button type="button" class="lang-btn" data-locale="en">EN</button>
+          <button type="button" class="lang-btn" data-locale="es">ES</button>
+        </div>
         <div class="crisis-mini">
           <span class="crisis-dot"></span>
           <div>
-            <strong>In crisis?</strong>
-            <a href="tel:988">Call or text 988</a>
+            <strong data-i18n="crisis.q">In crisis?</strong>
+            <a href="tel:988" data-i18n="crisis.cta">Call or text 988</a>
           </div>
         </div>
       </div>
@@ -57,65 +61,65 @@
       <section class="tab-panel active" id="tab-stress">
         <header class="page-head">
           <div>
-            <h1>Stress Tracker</h1>
-            <p class="subtitle">Log how today felt and the care you gave yourself.</p>
+            <h1 data-i18n="stress.title">Stress Tracker</h1>
+            <p class="subtitle" data-i18n="stress.subtitle">Log how today felt and the care you gave yourself.</p>
           </div>
         </header>
 
         <div class="stat-strip" id="stressStats">
-          <div class="stat-card"><span class="stat-value" data-stat="count">—</span><span class="stat-label">Entries logged</span></div>
-          <div class="stat-card"><span class="stat-value" data-stat="avg">—</span><span class="stat-label">Avg. stress</span></div>
-          <div class="stat-card"><span class="stat-value" data-stat="streak">—</span><span class="stat-label">Day streak</span></div>
-          <div class="stat-card"><span class="stat-value" data-stat="top">—</span><span class="stat-label">Top habit</span></div>
+          <div class="stat-card"><span class="stat-value" data-stat="count">—</span><span class="stat-label" data-i18n="stress.stats.count">Entries logged</span></div>
+          <div class="stat-card"><span class="stat-value" data-stat="avg">—</span><span class="stat-label" data-i18n="stress.stats.avg">Avg. stress</span></div>
+          <div class="stat-card"><span class="stat-value" data-stat="streak">—</span><span class="stat-label" data-i18n="stress.stats.streak">Day streak</span></div>
+          <div class="stat-card"><span class="stat-value" data-stat="top">—</span><span class="stat-label" data-i18n="stress.stats.top">Top habit</span></div>
         </div>
 
         <div class="stress-grid">
           <!-- Log form -->
           <div class="card log-card">
-            <h2 class="card-title">Today's check-in</h2>
+            <h2 class="card-title" data-i18n="stress.checkin">Today's check-in</h2>
             <form id="stressForm">
               <label class="field-label" for="stress">
-                Stress level <span class="stress-readout" id="stressReadout">5</span>
+                <span data-i18n="stress.level">Stress level</span> <span class="stress-readout" id="stressReadout">5</span>
               </label>
               <input type="range" id="stress" name="stress" min="1" max="10" value="5" class="slider" />
-              <div class="slider-scale"><span>Calm</span><span>Overwhelmed</span></div>
+              <div class="slider-scale"><span data-i18n="stress.calm">Calm</span><span data-i18n="stress.overwhelmed">Overwhelmed</span></div>
 
-              <label class="field-label">Mood</label>
-              <div class="mood-grid" id="moodGrid" role="radiogroup" aria-label="Mood">
+              <label class="field-label" data-i18n="stress.moodLabel">Mood</label>
+              <div class="mood-grid" id="moodGrid" role="radiogroup" data-i18n-aria="stress.moodLabel" aria-label="Mood">
                 <!-- populated by app.js -->
               </div>
 
-              <label class="field-label">Self-care completed</label>
+              <label class="field-label" data-i18n="stress.selfcare">Self-care completed</label>
               <div class="activity-grid" id="activityGrid">
                 <!-- populated by app.js -->
               </div>
 
-              <label class="field-label" for="note">Note <span class="optional">(optional)</span></label>
-              <textarea id="note" name="note" rows="2" maxlength="500" placeholder="What shaped today's stress level?"></textarea>
+              <label class="field-label" for="note"><span data-i18n="stress.note">Note</span> <span class="optional" data-i18n="common.optional">(optional)</span></label>
+              <textarea id="note" name="note" rows="2" maxlength="500" data-i18n-ph="stress.notePlaceholder" placeholder="What shaped today's stress level?"></textarea>
 
-              <button type="submit" class="btn btn-primary btn-block">Save check-in</button>
+              <button type="submit" class="btn btn-primary btn-block" data-i18n="stress.saveBtn">Save check-in</button>
               <p class="form-status" id="formStatus"></p>
             </form>
 
             <div class="card reset-prompt" id="resetPrompt" role="status" hidden>
-              <h3 class="reset-prompt-title">That sounds like a hard day.</h3>
-              <p class="reset-prompt-body">Want to take 90 seconds to reset?</p>
-              <button class="btn btn-primary btn-block" id="resetPromptStart">Try Box Breathing</button>
-              <button type="button" class="reset-prompt-dismiss" id="resetPromptDismiss">Maybe later</button>
+              <h3 class="reset-prompt-title" data-i18n="prompts.reset.title">That sounds like a hard day.</h3>
+              <p class="reset-prompt-body" data-i18n="prompts.reset.body">Want to take 90 seconds to reset?</p>
+              <button class="btn btn-primary btn-block" id="resetPromptStart" data-i18n="prompts.reset.start">Try Box Breathing</button>
+              <button type="button" class="reset-prompt-dismiss" id="resetPromptDismiss" data-i18n="prompts.reset.dismiss">Maybe later</button>
             </div>
 
             <div class="card reset-prompt crisis-prompt" id="crisisPrompt" role="status" hidden>
-              <h3 class="reset-prompt-title">That's a lot to carry.</h3>
-              <p class="reset-prompt-body">If things feel overwhelming, you don't have to handle this alone.</p>
-              <a class="btn btn-primary btn-block" id="crisisPromptText" href="sms:741741?body=HOME">Text 741741</a>
-              <button type="button" class="reset-prompt-dismiss" id="crisisPromptDismiss">I'm okay, just logging</button>
+              <h3 class="reset-prompt-title" data-i18n="prompts.crisis.title">That's a lot to carry.</h3>
+              <p class="reset-prompt-body" data-i18n="prompts.crisis.body">If things feel overwhelming, you don't have to handle this alone.</p>
+              <a class="btn btn-primary btn-block" id="crisisPromptText" href="sms:741741?body=HOME" data-i18n="prompts.crisis.text">Text 741741</a>
+              <button type="button" class="reset-prompt-dismiss" id="crisisPromptDismiss" data-i18n="prompts.crisis.dismiss">I'm okay, just logging</button>
             </div>
           </div>
 
           <!-- History feed -->
           <div class="card feed-card">
             <div class="card-head-row">
-              <h2 class="card-title">History feed</h2>
+              <h2 class="card-title" data-i18n="stress.feedTitle">History feed</h2>
               <span class="muted" id="feedCount"></span>
             </div>
             <div class="feed" id="stressFeed">
@@ -129,8 +133,8 @@
       <section class="tab-panel" id="tab-reset">
         <header class="page-head">
           <div>
-            <h1>Reset Kit</h1>
-            <p class="subtitle">Three tools to slow down when stress spikes.</p>
+            <h1 data-i18n="reset.title">Reset Kit</h1>
+            <p class="subtitle" data-i18n="reset.subtitle">Four tools to slow down when stress spikes.</p>
           </div>
         </header>
 
@@ -143,35 +147,35 @@
       <section class="tab-panel" id="tab-resources">
         <header class="page-head">
           <div>
-            <h1>Resources</h1>
-            <p class="subtitle">Plain-language guides to recognize, understand, and act.</p>
+            <h1 data-i18n="resources.title">Resources</h1>
+            <p class="subtitle" data-i18n="resources.subtitle">Plain-language guides to recognize, understand, and act.</p>
           </div>
         </header>
 
         <!-- Emergency Support Hub -->
-        <section class="emergency-hub" aria-label="Emergency Support Hub">
+        <section class="emergency-hub" data-i18n-aria="resources.hub.title" aria-label="Emergency Support Hub">
           <div class="emergency-head">
             <span class="emergency-pulse"></span>
-            <h2>Emergency Support Hub</h2>
+            <h2 data-i18n="resources.hub.title">Emergency Support Hub</h2>
           </div>
-          <p class="emergency-lede">
+          <p class="emergency-lede" data-i18n="resources.hub.lede">
             If you or someone you know may be in danger, reach out now. You deserve support, and help is free and confidential.
           </p>
 
           <div class="warning-block">
-            <h3>Suicide warning signs</h3>
+            <h3 data-i18n="resources.hub.warningsTitle">Suicide warning signs</h3>
             <ul class="warning-list" id="warningSigns"></ul>
           </div>
 
           <div class="hotline-grid" id="hotlineGrid"></div>
         </section>
 
-        <h2 class="section-heading">Education matrix</h2>
+        <h2 class="section-heading" data-i18n="resources.matrixHeading">Education matrix</h2>
         <div class="matrix" id="vaultMatrix">
           <!-- expandable cards injected by app.js -->
         </div>
 
-        <p class="disclaimer">
+        <p class="disclaimer" data-i18n="resources.disclaimer">
           MindArmor is an educational tool and not a substitute for professional medical advice,
           diagnosis, or treatment. If you're concerned about your health, please contact a qualified provider.
         </p>
@@ -185,6 +189,7 @@
     <div class="exercise-stage" id="exerciseStage"></div>
   </div>
 
+  <script src="/messages.js"></script>
   <script src="/data.js"></script>
   <script src="/app.js"></script>
 </body>

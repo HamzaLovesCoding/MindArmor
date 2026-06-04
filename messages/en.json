@@ -1,0 +1,285 @@
+{
+  "meta": {
+    "title": "MindArmor — Mental Health & Resilience",
+    "description": "MindArmor — track your stress, reset with grounding & breathing tools, and explore support resources."
+  },
+  "brand": { "name": "MindArmor", "tagline": "resilience, built daily" },
+  "nav": {
+    "stress": "Stress Tracker",
+    "reset": "Reset Kit",
+    "resources": "Resources",
+    "stressTitle": "Stress Tracker — press 1",
+    "resetTitle": "Reset Kit — press 2",
+    "resourcesTitle": "Resources — press 3"
+  },
+  "crisis": { "q": "In crisis?", "cta": "Call or text 988" },
+  "lang": { "label": "Language" },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "next": "Next",
+    "back": "Back",
+    "finish": "Finish",
+    "done": "Done",
+    "start": "Start",
+    "pause": "Pause",
+    "resume": "Resume",
+    "skip": "Skip",
+    "begin": "Begin",
+    "backToToolkit": "Back to toolkit",
+    "optional": "(optional)"
+  },
+  "stress": {
+    "title": "Stress Tracker",
+    "subtitle": "Log how today felt and the care you gave yourself.",
+    "stats": { "count": "Entries logged", "avg": "Avg. stress", "streak": "Day streak", "top": "Top habit" },
+    "streakDay": "day",
+    "streakDays": "days",
+    "checkin": "Today's check-in",
+    "level": "Stress level",
+    "calm": "Calm",
+    "overwhelmed": "Overwhelmed",
+    "moodLabel": "Mood",
+    "selfcare": "Self-care completed",
+    "note": "Note",
+    "notePlaceholder": "What shaped today's stress level?",
+    "saveBtn": "Save check-in",
+    "saved": "Check-in saved ✓",
+    "removed": "Entry removed",
+    "loadError": "Could not load history",
+    "feedTitle": "History feed",
+    "entry": "entry",
+    "entries": "entries",
+    "emptyLine1": "No check-ins yet.",
+    "emptyLine2": "Log today's check-in to start your history.",
+    "noActivities": "No activities logged",
+    "delete": "Delete entry",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "badge": { "low": "Low stress", "moderate": "Moderate stress", "high": "High stress" }
+  },
+  "activities": {
+    "sleep": "Quality sleep",
+    "exercise": "Exercise",
+    "mindfulness": "Mindfulness",
+    "nutrition": "Ate well",
+    "social": "Connection",
+    "outdoors": "Time outdoors",
+    "journaling": "Journaling",
+    "hydration": "Hydration"
+  },
+  "moods": {
+    "anxious": "Anxious",
+    "sad": "Sad",
+    "angry": "Angry",
+    "numb": "Numb",
+    "hopeful": "Hopeful"
+  },
+  "prompts": {
+    "reset": {
+      "title": "That sounds like a hard day.",
+      "body": "Want to take 90 seconds to reset?",
+      "start": "Try Box Breathing",
+      "dismiss": "Maybe later"
+    },
+    "crisis": {
+      "title": "That's a lot to carry.",
+      "body": "If things feel overwhelming, you don't have to handle this alone.",
+      "text": "Text 741741",
+      "dismiss": "I'm okay, just logging"
+    }
+  },
+  "reset": {
+    "title": "Reset Kit",
+    "subtitle": "Four tools to slow down when stress spikes.",
+    "cards": {
+      "box": { "title": "Box Breathing", "desc": "Steady your nervous system with a 4-4-4-4 rhythm." },
+      "grounding": { "title": "5-4-3-2-1 Grounding", "desc": "Anchor to the present using your five senses." },
+      "pmr": { "title": "Progressive Muscle Relaxation", "desc": "Release tension by tensing and relaxing muscle groups." },
+      "urge": { "title": "Urge Surfing", "desc": "Ride out a craving or intense urge for 3 minutes." }
+    },
+    "box": {
+      "ready": "Ready",
+      "in": "Breathe in",
+      "hold": "Hold",
+      "out": "Breathe out",
+      "cycle": "Cycle {n} of {goal}",
+      "done": "Nice work — how do you feel?"
+    },
+    "grounding": {
+      "see": "see", "touch": "touch", "hear": "hear", "smell": "smell", "taste": "taste",
+      "thing": "thing", "things": "things",
+      "prompt": "{n} {noun} you can {verb}",
+      "placeholder": "Optional — name them here…",
+      "done": "You're here. You're grounded."
+    },
+    "pmr": {
+      "feet": "feet", "calves": "calves", "thighs": "thighs", "hands": "hands",
+      "arms": "arms", "shoulders": "shoulders", "face": "face",
+      "tense": "Tense your {region}",
+      "release": "Release",
+      "done": "Take a slow breath. You're done."
+    },
+    "urge": {
+      "introTitle": "Urges are like waves.",
+      "introBody": "They rise, peak, and fall — usually within minutes. You don't have to fight it. Just notice it.",
+      "nameTitle": "What are you feeling pulled toward?",
+      "chips": {
+        "substance": "Substance", "phone": "Phone/scroll", "food": "Food",
+        "lashout": "Lash out", "isolate": "Isolate", "other": "Something else"
+      },
+      "strengthLabel": "How strong is the urge right now?",
+      "mild": "Mild",
+      "intense": "Intense",
+      "surf": "Surf it",
+      "phaseRise": "The wave is rising. Just watch.",
+      "phasePeak": "This is the peak. Stay with it.",
+      "phaseFall": "It's already passing. Notice.",
+      "closeTitle": "How strong is the urge now?",
+      "compare": "Started at {start}, now at {now}",
+      "closing": "Urges pass. You stayed."
+    }
+  },
+  "resources": {
+    "title": "Resources",
+    "subtitle": "Plain-language guides to recognize, understand, and act.",
+    "matrixHeading": "Education matrix",
+    "disclaimer": "MindArmor is an educational tool and not a substitute for professional medical advice, diagnosis, or treatment. If you're concerned about your health, please contact a qualified provider.",
+    "hub": {
+      "title": "Emergency Support Hub",
+      "lede": "If you or someone you know may be in danger, reach out now. You deserve support, and help is free and confidential.",
+      "warningsTitle": "Suicide warning signs"
+    },
+    "warnings": [
+      "Talking about wanting to die or to kill oneself",
+      "Looking for a way to end one's life",
+      "Talking about feeling hopeless or having no reason to live",
+      "Talking about feeling trapped or being a burden to others",
+      "Increasing use of alcohol or drugs",
+      "Withdrawing from friends, family, and activities",
+      "Extreme mood swings, rage, or agitation",
+      "Giving away prized possessions or saying goodbye",
+      "Sleeping too little or too much",
+      "Acting anxious, reckless, or agitated"
+    ],
+    "hotlines": {
+      "lifeline988": {
+        "name": "988 Suicide & Crisis Lifeline",
+        "desc": "Free, confidential support 24/7 for anyone in distress (US). Call or text.",
+        "callLabel": "Call 988",
+        "textLabel": "Text 988"
+      },
+      "crisisText": {
+        "name": "Crisis Text Line",
+        "desc": "Text HOME to connect with a trained crisis counselor, 24/7 (US).",
+        "textLabel": "Text HOME to 741741"
+      },
+      "samhsa": {
+        "name": "SAMHSA National Helpline",
+        "desc": "Treatment referral and information for mental health and substance use, 24/7.",
+        "callLabel": "Call 1-800-662-4357"
+      },
+      "findhelpline": {
+        "name": "Find a Helpline (Global)",
+        "desc": "Free, confidential support hotlines in 130+ countries.",
+        "linkLabel": "Open directory"
+      }
+    },
+    "cards": {
+      "depression": {
+        "icon": "🌧️",
+        "title": "Clinical Depression",
+        "subtitle": "Signs, symptoms & when to seek help",
+        "sections": [
+          {
+            "heading": "Emotional signs",
+            "list": [
+              "Persistent sad, empty, or hopeless mood most of the day, nearly every day",
+              "Loss of interest or pleasure in activities once enjoyed (anhedonia)",
+              "Feelings of worthlessness, excessive or inappropriate guilt",
+              "Irritability, restlessness, or frequent tearfulness"
+            ]
+          },
+          {
+            "heading": "Physical & cognitive signs",
+            "list": [
+              "Changes in sleep — insomnia or sleeping far too much",
+              "Significant appetite or weight changes",
+              "Fatigue or loss of energy even after rest",
+              "Trouble concentrating, remembering, or making decisions",
+              "Unexplained aches, pains, or digestive problems"
+            ]
+          },
+          {
+            "heading": "When it may be clinical",
+            "text": "Symptoms that last two weeks or longer, occur most of the day, and interfere with work, relationships, or daily life may indicate a major depressive episode. Depression is a medical condition — not a weakness or a choice — and it is highly treatable."
+          },
+          {
+            "tip": "A first step can be talking to a primary-care doctor or a licensed therapist. Treatment often combines therapy, lifestyle support, and (when appropriate) medication."
+          }
+        ]
+      },
+      "addiction": {
+        "icon": "⛓️",
+        "title": "Drug Addiction",
+        "subtitle": "Behaviors, dangers & paths to help",
+        "sections": [
+          {
+            "heading": "Behavioral warning signs",
+            "list": [
+              "Using more, or for longer, than intended — and being unable to cut down",
+              "Strong cravings; much of life organized around getting or using the substance",
+              "Neglecting responsibilities at work, school, or home",
+              "Withdrawing from family and friends; secrecy and isolation",
+              "Continuing to use despite clear harm to health or relationships"
+            ]
+          },
+          {
+            "heading": "Physical dangers",
+            "list": [
+              "Tolerance (needing more for the same effect) and painful withdrawal symptoms",
+              "Risk of overdose — which can be fatal, especially with opioids",
+              "Damage to the heart, liver, lungs, and brain over time",
+              "Increased risk of infection from injection or impaired judgment"
+            ]
+          },
+          {
+            "heading": "Why it's hard to \"just stop\"",
+            "text": "Addiction changes brain circuits involved in reward, stress, and self-control, which is why willpower alone often isn't enough. It is a chronic but treatable medical condition — and recovery is absolutely possible with the right support."
+          },
+          {
+            "tip": "SAMHSA's National Helpline (1-800-662-4357) offers free, confidential, 24/7 referrals to treatment. Recovery is a process, and relapse is a setback — not a failure."
+          }
+        ]
+      },
+      "resilience": {
+        "icon": "🌱",
+        "title": "Building Resilience",
+        "subtitle": "Everyday habits that armor the mind",
+        "sections": [
+          {
+            "heading": "Core protective factors",
+            "list": [
+              "Strong social connection — even one trusted person makes a difference",
+              "Regular movement, sleep, and nourishing food",
+              "A sense of meaning, purpose, or routine",
+              "Naming emotions instead of avoiding them"
+            ]
+          },
+          {
+            "heading": "Simple practices to try",
+            "list": [
+              "Box breathing: inhale 4s · hold 4s · exhale 4s · hold 4s",
+              "A daily \"3 good things\" gratitude note",
+              "Short walks outside, especially in daylight",
+              "Limiting doomscrolling before bed"
+            ]
+          },
+          {
+            "tip": "Resilience isn't about never struggling — it's about recovering and adapting. Small, repeated habits build it far more than occasional big efforts."
+          }
+        ]
+      }
+    }
+  }
+}

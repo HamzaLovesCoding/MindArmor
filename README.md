@@ -32,6 +32,14 @@ support — all in one calm, focused interface.
 - A brightly highlighted **Emergency Support Hub** listing **suicide warning
   signs** and active **crisis hotlines** with one-tap call/text buttons.
 
+### 🌐 Bilingual (English / Spanish)
+- A sidebar **EN / ES** toggle translates the entire UI — every page, modal,
+  and message — instantly, with no page reload.
+- The choice persists in `localStorage`. Translations live in
+  [`messages/en.json`](messages/en.json) and [`messages/es.json`](messages/es.json)
+  and are served to the browser via `/messages.js` so there's no flash of
+  untranslated content. Spanish is neutral Latin American (tú form).
+
 ---
 
 ## 🚀 Getting started (desktop)
