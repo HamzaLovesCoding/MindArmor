@@ -1,5 +1,5 @@
 /* ============================================================
-   MindArmor — static content (activities, quiz, vault, crisis)
+   MindArmor — static content (activities, reset kit, vault, crisis)
    Exposed on window.MA_DATA for app.js.
    ============================================================ */
 window.MA_DATA = {
@@ -15,112 +15,28 @@ window.MA_DATA = {
     { key: 'hydration',   label: 'Hydration',      emoji: '💧' },
   ],
 
-  // ---------------- Communication Shield quiz ----------------
-  // Each option maps to a style. Tally decides the dominant style.
-  quiz: [
+  // ---------------- Reset Kit (grounding / breathing tools) ----------------
+  // Card metadata only; the interactive logic lives in app.js.
+  resetKit: [
     {
-      scenario: 'At work',
-      question: 'A teammate keeps taking credit for your ideas in meetings. What do you do?',
-      options: [
-        { text: 'Say nothing and quietly feel resentful — it’s not worth the drama.', style: 'Passive' },
-        { text: 'Privately ask them to acknowledge shared work next time, and speak up in the moment going forward.', style: 'Assertive' },
-        { text: 'Call them out sharply in front of everyone so they’re embarrassed.', style: 'Aggressive' },
-      ],
+      key: 'box',
+      icon: '🫁',
+      title: 'Box Breathing',
+      desc: 'Steady your nervous system with a 4-4-4-4 rhythm.',
     },
     {
-      scenario: 'With a friend',
-      question: 'A close friend cancels plans last-minute for the third time. How do you respond?',
-      options: [
-        { text: '“No worries at all!” — even though you’re hurt and disappointed.', style: 'Passive' },
-        { text: '“I understand things come up, but this keeps happening and it’s frustrating. Can we find a plan that sticks?”', style: 'Assertive' },
-        { text: '“Forget it. You’re obviously a flake and I’m done making plans with you.”', style: 'Aggressive' },
-      ],
+      key: 'grounding',
+      icon: '🖐️',
+      title: '5-4-3-2-1 Grounding',
+      desc: 'Anchor to the present using your five senses.',
     },
     {
-      scenario: 'At home',
-      question: 'Your roommate consistently leaves dishes for you to clean. You decide to…',
-      options: [
-        { text: 'Keep cleaning them yourself and hope they notice eventually.', style: 'Passive' },
-        { text: 'Calmly propose a chore schedule and explain how the mess affects you.', style: 'Assertive' },
-        { text: 'Pile their dirty dishes on their bed to “teach them a lesson.”', style: 'Aggressive' },
-      ],
-    },
-    {
-      scenario: 'Setting a boundary',
-      question: 'Someone asks for a favor you genuinely don’t have time for. You…',
-      options: [
-        { text: 'Say yes anyway and overextend yourself, then feel drained and used.', style: 'Passive' },
-        { text: '“I’d love to help, but I can’t take this on right now. Here’s what I can do instead…”', style: 'Assertive' },
-        { text: '“Why is that my problem? Figure it out yourself.”', style: 'Aggressive' },
-      ],
-    },
-    {
-      scenario: 'Receiving criticism',
-      question: 'Your manager gives you tough but fair feedback on a project. Your gut reaction is to…',
-      options: [
-        { text: 'Apologize profusely, agree with everything, and shrink — even points you disagree with.', style: 'Passive' },
-        { text: 'Listen, ask clarifying questions, and share your perspective where it differs.', style: 'Assertive' },
-        { text: 'Get defensive, make excuses, and blame teammates or unclear instructions.', style: 'Aggressive' },
-      ],
+      key: 'pmr',
+      icon: '💪',
+      title: 'Progressive Muscle Relaxation',
+      desc: 'Release tension by tensing and relaxing muscle groups.',
     },
   ],
-
-  // Detailed analysis per dominant style.
-  styles: {
-    Assertive: {
-      tagline: 'Clear, confident, and respectful — of yourself and others.',
-      summary:
-        'You tend to express your needs and feelings openly while still honoring the other person. ' +
-        'This is widely considered the healthiest communication style: it protects your boundaries, ' +
-        'reduces resentment, and builds trust because people know where they stand with you.',
-      strengths: [
-        'You state needs directly without attacking or apologizing for them.',
-        'You can say “no” and set boundaries without guilt.',
-        'You listen to others and stay open to feedback.',
-        'Conflicts tend to resolve rather than simmer.',
-      ],
-      growth: [
-        'Watch for moments where stress nudges you toward bluntness — pair honesty with warmth.',
-        'Keep checking that “assertive” doesn’t slide into “always right.” Curiosity keeps it balanced.',
-      ],
-    },
-    Passive: {
-      tagline: 'Accommodating and kind — but often at your own expense.',
-      summary:
-        'You tend to prioritize keeping the peace over voicing your own needs. While this can make you ' +
-        'easy to be around, unspoken feelings often build into resentment, burnout, or a sense of being ' +
-        'overlooked. Your needs matter just as much as everyone else’s — and saying so is a skill you can build.',
-      strengths: [
-        'You’re empathetic and genuinely considerate of others.',
-        'You rarely escalate conflict or hurt people impulsively.',
-        'You’re a calm, steady presence in tense moments.',
-      ],
-      growth: [
-        'Practice naming one need per day, even something small (“I’d prefer this restaurant”).',
-        'Try the formula: “When ___ happens, I feel ___. What I’d like is ___.”',
-        'Remember: a boundary isn’t an attack. “No” is a complete sentence.',
-        'Notice physical signals of resentment — they’re a cue you skipped voicing something.',
-      ],
-    },
-    Aggressive: {
-      tagline: 'Direct and forceful — but it can cost you trust and connection.',
-      summary:
-        'You’re not afraid to say what you think, which means your needs rarely go unheard. The risk is that ' +
-        'force can tip into blame, sarcasm, or steamrolling — leaving others defensive or distant. ' +
-        'The good news: the underlying directness is a strength. Channeled with empathy, it becomes assertiveness.',
-      strengths: [
-        'You’re honest and people rarely have to guess what you want.',
-        'You can make hard decisions and stand your ground under pressure.',
-        'You don’t bottle things up until they explode.',
-      ],
-      growth: [
-        'Pause before reacting — a 6-second breath lets the thinking brain catch up.',
-        'Swap “you” accusations for “I” statements: “I felt blindsided” vs. “You blindsided me.”',
-        'Aim to win the relationship, not just the argument. Ask: “What outcome do I actually want?”',
-        'Watch for sarcasm and volume — they read as contempt even when you don’t mean them to.',
-      ],
-    },
-  },
 
   // ---------------- The Vault — education matrix ----------------
   vault: [

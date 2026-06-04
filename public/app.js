@@ -75,8 +75,9 @@
     });
 
     // Desktop keyboard shortcuts: 1 / 2 / 3 jump between tabs.
-    const shortcuts = { '1': 'stress', '2': 'shield', '3': 'vault' };
+    const shortcuts = { '1': 'stress', '2': 'reset', '3': 'vault' };
     document.addEventListener('keydown', (e) => {
+      if (modalOpen) return; // don't switch tabs behind an open exercise
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
       const tab = shortcuts[e.key];
@@ -231,131 +232,317 @@
   }
 
   // =====================================================================
-  // COMMUNICATION SHIELD (quiz)
+  // RESET KIT (grounding & breathing tools)
   // =====================================================================
-  const quizState = { index: 0, answers: [] };
+  let modalOpen = false;
+  let activeCleanup = null;
+  let lastTrigger = null;
 
-  function renderQuizIntro() {
-    const card = $('#quizCard');
-    card.innerHTML = `
-      <div class="quiz-intro">
-        <div class="quiz-emoji">🗣️</div>
-        <h2>What's your communication style?</h2>
-        <p>Answer 5 quick scenarios honestly — there are no wrong answers.
-           We'll map your responses to one of three styles and share a personalized breakdown.</p>
-        <button class="btn btn-primary" id="quizStart">Start the quiz</button>
-      </div>`;
-    $('#quizStart').addEventListener('click', () => {
-      quizState.index = 0;
-      quizState.answers = [];
-      renderQuizQuestion();
+  const prefersReducedMotion = () =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // A pausable, delta-time ticker built on requestAnimationFrame.
+  function makeTicker(onTick) {
+    let raf = null;
+    let last = 0;
+    let running = false;
+    function frame(ts) {
+      if (!running) return;
+      const dt = ts - last;
+      last = ts;
+      onTick(dt);
+      if (running) raf = requestAnimationFrame(frame);
+    }
+    return {
+      start() {
+        if (running) return;
+        running = true;
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      },
+      pause() { running = false; if (raf) cancelAnimationFrame(raf); raf = null; },
+      stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = null; },
+      get running() { return running; },
+    };
+  }
+
+  function renderResetKit() {
+    const grid = $('#resetGrid');
+    grid.innerHTML = D.resetKit.map((ex) => `
+      <div class="card reset-card">
+        <div class="reset-icon">${ex.icon}</div>
+        <h2 class="reset-title">${escapeHtml(ex.title)}</h2>
+        <p class="reset-desc">${escapeHtml(ex.desc)}</p>
+        <button class="btn btn-primary reset-start" data-ex="${ex.key}">Start</button>
+      </div>`).join('');
+
+    $$('.reset-start', grid).forEach((btn) => {
+      btn.addEventListener('click', () => openExercise(btn.dataset.ex, btn));
+    });
+
+    $('#exerciseClose').addEventListener('click', closeExercise);
+    document.addEventListener('keydown', (e) => {
+      if (modalOpen && e.key === 'Escape') { e.preventDefault(); closeExercise(); }
     });
   }
 
-  function renderQuizQuestion() {
-    const card = $('#quizCard');
-    const q = D.quiz[quizState.index];
-    const total = D.quiz.length;
-    const pct = (quizState.index / total) * 100;
+  const EXERCISES = { box: exBox, grounding: exGrounding, pmr: exPmr };
 
-    card.innerHTML = `
-      <div class="quiz-progress">
-        <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
-        <div class="quiz-progress-text">Question ${quizState.index + 1} of ${total}</div>
-      </div>
-      <div class="quiz-scenario">${escapeHtml(q.scenario)}</div>
-      <div class="quiz-question">${escapeHtml(q.question)}</div>
-      <div class="quiz-options">
-        ${q.options.map((o, i) => `<button class="quiz-option" data-i="${i}">${escapeHtml(o.text)}</button>`).join('')}
-      </div>
-      <div class="quiz-nav">
-        ${quizState.index > 0 ? '<button class="btn btn-ghost" id="quizBack">← Back</button>' : '<span></span>'}
+  function openExercise(key, trigger) {
+    const builder = EXERCISES[key];
+    if (!builder) return;
+    lastTrigger = trigger || null;
+    const stage = $('#exerciseStage');
+    stage.innerHTML = '';
+    activeCleanup = builder(stage) || null;
+    $('#exerciseOverlay').hidden = false;
+    document.body.classList.add('modal-open');
+    modalOpen = true;
+    $('#exerciseClose').focus();
+  }
+
+  function closeExercise() {
+    if (typeof activeCleanup === 'function') activeCleanup();
+    activeCleanup = null;
+    $('#exerciseOverlay').hidden = true;
+    $('#exerciseStage').innerHTML = '';
+    document.body.classList.remove('modal-open');
+    modalOpen = false;
+    if (lastTrigger) { lastTrigger.focus(); lastTrigger = null; }
+  }
+
+  // ---------- Exercise 1: Box Breathing (4-4-4-4) ----------
+  function exBox(stage) {
+    const reduce = prefersReducedMotion();
+    const phases = [
+      { label: 'Breathe in',  dur: 4000, from: 0.6, to: 1.0 },
+      { label: 'Hold',        dur: 4000, from: 1.0, to: 1.0 },
+      { label: 'Breathe out', dur: 4000, from: 1.0, to: 0.6 },
+      { label: 'Hold',        dur: 4000, from: 0.6, to: 0.6 },
+    ];
+    let goal = 4;
+    let cycle = 1;
+    let phaseIdx = 0;
+    let elapsed = 0;
+    let status = 'idle'; // idle | running | paused | done
+
+    stage.innerHTML = `
+      <div class="ex ex-box">
+        <h2 class="ex-title">Box Breathing</h2>
+        <div class="box-wrap">
+          <div class="box-square${reduce ? ' static' : ''}" id="boxSquare">
+            <span class="box-phase" id="boxPhase">Ready</span>
+          </div>
+        </div>
+        <div class="box-bar" id="boxBar"${reduce ? '' : ' hidden'}>
+          <div class="box-bar-fill" id="boxBarFill"></div>
+        </div>
+        <div class="ex-counter">
+          <button class="counter-btn" id="boxMinus" aria-label="Fewer cycles">−</button>
+          <span id="boxCounter">Cycle 1 of ${goal}</span>
+          <button class="counter-btn" id="boxPlus" aria-label="More cycles">+</button>
+        </div>
+        <button class="btn btn-primary ex-action" id="boxToggle">Start</button>
       </div>`;
 
-    $$('.quiz-option', card).forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const choice = Number(btn.dataset.i);
-        quizState.answers[quizState.index] = q.options[choice].style;
-        if (quizState.index < total - 1) {
-          quizState.index += 1;
-          renderQuizQuestion();
-        } else {
-          finishQuiz();
+    const square = $('#boxSquare', stage);
+    const phaseEl = $('#boxPhase', stage);
+    const counterEl = $('#boxCounter', stage);
+    const barFill = $('#boxBarFill', stage);
+    const toggle = $('#boxToggle', stage);
+    const minus = $('#boxMinus', stage);
+    const plus = $('#boxPlus', stage);
+
+    if (!reduce) square.style.transform = 'scale(0.6)';
+
+    function setGoal(next) {
+      goal = Math.max(1, Math.min(8, next));
+      counterEl.textContent = `Cycle ${cycle} of ${goal}`;
+    }
+    minus.addEventListener('click', () => { if (status === 'idle') setGoal(goal - 1); });
+    plus.addEventListener('click', () => { if (status === 'idle') setGoal(goal + 1); });
+
+    const ticker = makeTicker((dt) => {
+      elapsed += dt;
+      const ph = phases[phaseIdx];
+      const p = Math.min(elapsed / ph.dur, 1);
+      phaseEl.textContent = ph.label;
+      counterEl.textContent = `Cycle ${cycle} of ${goal}`;
+      if (reduce) {
+        barFill.style.width = `${p * 100}%`;
+      } else {
+        square.style.transform = `scale(${ph.from + (ph.to - ph.from) * p})`;
+      }
+      if (elapsed >= ph.dur) {
+        phaseIdx += 1;
+        if (phaseIdx >= phases.length) {
+          if (cycle >= goal) { finish(); return; }
+          cycle += 1;
+          phaseIdx = 0;
         }
+        elapsed = 0;
+      }
+    });
+
+    function finish() {
+      ticker.stop();
+      status = 'done';
+      stage.innerHTML = `
+        <div class="ex ex-done">
+          <div class="ex-done-emoji">🌿</div>
+          <h2 class="ex-title">Nice work — how do you feel?</h2>
+          <button class="btn btn-primary" id="boxDone">Back to toolkit</button>
+        </div>`;
+      $('#boxDone', stage).addEventListener('click', closeExercise);
+    }
+
+    toggle.addEventListener('click', () => {
+      if (status === 'idle' || status === 'paused') {
+        status = 'running';
+        toggle.textContent = 'Pause';
+        minus.disabled = true;
+        plus.disabled = true;
+        ticker.start();
+      } else if (status === 'running') {
+        status = 'paused';
+        toggle.textContent = 'Resume';
+        ticker.pause();
+      }
+    });
+
+    return () => ticker.stop();
+  }
+
+  // ---------- Exercise 2: 5-4-3-2-1 Grounding ----------
+  function exGrounding(stage) {
+    const steps = [
+      { n: 5, verb: 'see' },
+      { n: 4, verb: 'touch' },
+      { n: 3, verb: 'hear' },
+      { n: 2, verb: 'smell' },
+      { n: 1, verb: 'taste' },
+    ];
+    const notes = new Array(steps.length).fill(''); // ephemeral, never persisted
+    let idx = 0;
+
+    function dots() {
+      return `<div class="ground-dots">${steps.map((_, i) =>
+        `<span class="dot${i === idx ? ' active' : ''}${i < idx ? ' done' : ''}"></span>`).join('')}</div>`;
+    }
+
+    function renderStep() {
+      const s = steps[idx];
+      const noun = s.n === 1 ? 'thing' : 'things';
+      stage.innerHTML = `
+        <div class="ex ex-ground">
+          ${dots()}
+          <div class="gradient-text ground-number">${s.n}</div>
+          <p class="ground-prompt">${s.n} ${noun} you can <strong>${s.verb}</strong></p>
+          <textarea class="ground-input" id="groundInput" rows="3" placeholder="Optional — name them here…"></textarea>
+          <div class="ex-nav">
+            <button class="btn btn-ghost" id="groundBack"${idx === 0 ? ' disabled' : ''}>Back</button>
+            <button class="btn btn-primary" id="groundNext">${idx < steps.length - 1 ? 'Next' : 'Finish'}</button>
+          </div>
+        </div>`;
+      const input = $('#groundInput', stage);
+      input.value = notes[idx];
+      input.addEventListener('input', () => { notes[idx] = input.value; });
+      $('#groundBack', stage).addEventListener('click', () => { if (idx > 0) { idx -= 1; renderStep(); } });
+      $('#groundNext', stage).addEventListener('click', () => {
+        if (idx < steps.length - 1) { idx += 1; renderStep(); } else { renderDone(); }
       });
-    });
+    }
 
-    const back = $('#quizBack');
-    if (back) back.addEventListener('click', () => {
-      quizState.index -= 1;
-      renderQuizQuestion();
-    });
+    function renderDone() {
+      stage.innerHTML = `
+        <div class="ex ex-done">
+          <div class="ex-done-emoji">🌎</div>
+          <h2 class="ex-title">You're here. You're grounded.</h2>
+          <button class="btn btn-primary" id="groundDone">Back to toolkit</button>
+        </div>`;
+      $('#groundDone', stage).addEventListener('click', closeExercise);
+    }
+
+    renderStep();
+    return null; // no timers to clean up
   }
 
-  function tallyStyle(answers) {
-    const scores = { Assertive: 0, Passive: 0, Aggressive: 0 };
-    answers.forEach((s) => { scores[s] = (scores[s] || 0) + 1; });
-    // Determine dominant style; tie-break favors the healthier style order.
-    const order = ['Assertive', 'Passive', 'Aggressive'];
-    let dominant = order[0];
-    let best = -1;
-    order.forEach((s) => { if (scores[s] > best) { best = scores[s]; dominant = s; } });
-    return { scores, dominant };
-  }
+  // ---------- Exercise 3: Progressive Muscle Relaxation ----------
+  function exPmr(stage) {
+    const regions = ['feet', 'calves', 'thighs', 'hands', 'arms', 'shoulders', 'face'];
+    const phases = [];
+    regions.forEach((r) => {
+      phases.push({ region: r, label: `Tense your ${r}`, dur: 5000 });
+      phases.push({ region: r, label: 'Release', dur: 10000 });
+    });
 
-  async function finishQuiz() {
-    const { scores, dominant } = tallyStyle(quizState.answers);
-    const info = D.styles[dominant];
-    const total = D.quiz.length;
+    let idx = 0;
+    let elapsed = 0;
+    const R = 52;
+    const C = 2 * Math.PI * R;
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-    const card = $('#quizCard');
-    card.innerHTML = `
-      <div class="result-head">
-        <div class="quiz-scenario">Your dominant style</div>
-        <div class="result-style ${dominant}">${dominant}</div>
-        <div class="result-tagline">${escapeHtml(info.tagline)}</div>
-      </div>
-
-      <div class="result-bars">
-        ${['Assertive', 'Passive', 'Aggressive'].map((s) => {
-          const val = scores[s] || 0;
-          const pct = Math.round((val / total) * 100);
-          return `
-            <div class="result-bar-row">
-              <span>${s}</span>
-              <div class="result-bar-track"><div class="result-bar-fill ${s}" style="width:0%" data-w="${pct}"></div></div>
-              <span class="result-bar-val">${pct}%</span>
-            </div>`;
-        }).join('')}
-      </div>
-
-      <div class="result-analysis">
-        <h3>What this means</h3>
-        <p>${escapeHtml(info.summary)}</p>
-        <h3>Your strengths</h3>
-        <ul>${info.strengths.map((x) => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
-        <h3>Where to grow</h3>
-        <ul>${info.growth.map((x) => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
-      </div>
-
-      <div class="quiz-nav">
-        <button class="btn btn-ghost" id="quizRetake">↺ Retake quiz</button>
+    stage.innerHTML = `
+      <div class="ex ex-pmr">
+        <div class="pmr-ring">
+          <svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true">
+            <defs>
+              <linearGradient id="pmrGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#7c5cff" />
+                <stop offset="100%" stop-color="#22d3ee" />
+              </linearGradient>
+            </defs>
+            <circle cx="75" cy="75" r="${R}" fill="none" stroke="var(--ring-track)" stroke-width="11" />
+            <circle cx="75" cy="75" r="${R}" fill="none" stroke="url(#pmrGrad)" stroke-width="11"
+              stroke-linecap="round" transform="rotate(-90 75 75)"
+              stroke-dasharray="${C}" stroke-dashoffset="0" id="pmrRing" />
+          </svg>
+          <div class="pmr-center"><span id="pmrSeconds">5</span></div>
+        </div>
+        <div class="gradient-text pmr-region" id="pmrRegion">Feet</div>
+        <div class="pmr-action" id="pmrAction">Tense your feet</div>
+        <button class="btn btn-primary ex-action" id="pmrToggle">Pause</button>
       </div>`;
 
-    // Animate bars in.
-    requestAnimationFrame(() => {
-      $$('.result-bar-fill', card).forEach((b) => { b.style.width = b.dataset.w + '%'; });
+    const ring = $('#pmrRing', stage);
+    const secondsEl = $('#pmrSeconds', stage);
+    const regionEl = $('#pmrRegion', stage);
+    const actionEl = $('#pmrAction', stage);
+    const toggle = $('#pmrToggle', stage);
+
+    const ticker = makeTicker((dt) => {
+      elapsed += dt;
+      const ph = phases[idx];
+      const p = Math.min(elapsed / ph.dur, 1);
+      ring.style.strokeDashoffset = `${C * p}`;
+      secondsEl.textContent = Math.max(0, Math.ceil((ph.dur - elapsed) / 1000));
+      regionEl.textContent = cap(ph.region);
+      actionEl.textContent = ph.label;
+      if (elapsed >= ph.dur) {
+        idx += 1;
+        if (idx >= phases.length) { finish(); return; }
+        elapsed = 0;
+      }
     });
 
-    $('#quizRetake').addEventListener('click', renderQuizIntro);
+    function finish() {
+      ticker.stop();
+      stage.innerHTML = `
+        <div class="ex ex-done">
+          <div class="ex-done-emoji">😌</div>
+          <h2 class="ex-title">Take a slow breath. You're done.</h2>
+          <button class="btn btn-primary" id="pmrDone">Back to toolkit</button>
+        </div>`;
+      $('#pmrDone', stage).addEventListener('click', closeExercise);
+    }
 
-    // Persist result (best-effort).
-    try {
-      await api('/api/quiz/results', {
-        method: 'POST',
-        body: JSON.stringify({ style: dominant, scores }),
-      });
-    } catch (_) { /* non-critical */ }
+    toggle.addEventListener('click', () => {
+      if (ticker.running) { ticker.pause(); toggle.textContent = 'Resume'; }
+      else { ticker.start(); toggle.textContent = 'Pause'; }
+    });
+
+    ticker.start(); // auto-advances through all regions
+    return () => ticker.stop();
   }
 
   // =====================================================================
@@ -428,7 +615,7 @@
     renderActivityGrid();
     initStressForm();
     loadStress();
-    renderQuizIntro();
+    renderResetKit();
     renderVault();
   }
 

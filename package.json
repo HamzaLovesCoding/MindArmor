@@ -1,12 +1,13 @@
 {
   "name": "mindarmor",
   "version": "1.0.0",
-  "description": "MindArmor — a mental health & resilience dashboard with mood tracking, communication-style analysis, and an educational support vault.",
+  "description": "MindArmor — a mental health & resilience dashboard with stress tracking, grounding/breathing reset tools, and an educational support vault.",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "build": "node --check server.js && node --check db.js && node --check public/app.js && node --check public/data.js && echo \"MindArmor: all sources valid\""
   },
   "keywords": [
     "mental-health",

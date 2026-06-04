@@ -1,10 +1,10 @@
 # 🛡️ MindArmor
 
 A sleek, dark-mode **mental health & resilience dashboard**. MindArmor helps you
-track your daily wellbeing, understand how you handle conflict, and find trusted
+track your daily wellbeing, reset when stress spikes, and find trusted
 support — all in one calm, focused interface.
 
-![tabs: Stress Tracker · Communication Shield · The Vault](https://img.shields.io/badge/tabs-Stress%20Tracker%20%C2%B7%20Communication%20Shield%20%C2%B7%20The%20Vault-7c5cff)
+![tabs: Stress Tracker · Reset Kit · The Vault](https://img.shields.io/badge/tabs-Stress%20Tracker%20%C2%B7%20Reset%20Kit%20%C2%B7%20The%20Vault-7c5cff)
 
 ---
 
@@ -17,11 +17,13 @@ support — all in one calm, focused interface.
   **history feed with visual progress rings**.
 - A stat strip surfaces your entry count, average stress, logging **streak**, and most-frequent habit.
 
-### 🗣️ Communication Shield
-- An interactive **5-question scenario quiz** that evaluates your conflict style:
-  **Assertive · Passive · Aggressive**.
-- Animated progress, back-navigation, and a detailed end-of-quiz **analysis** with
-  a style breakdown, strengths, and personalized growth tips.
+### 🌬️ Reset Kit
+- Three evidence-based grounding/breathing tools, each launched in a focused
+  fullscreen overlay (X or Esc to close):
+  - **Box Breathing** — animated 4-4-4-4 square with a cycle goal (1–8). Respects `prefers-reduced-motion`.
+  - **5-4-3-2-1 Grounding** — step-by-step sensory anchoring with progress dots.
+  - **Progressive Muscle Relaxation** — auto-advancing tense/release sequence with a circular countdown.
+- Nothing is saved — the Reset Kit is intentionally ephemeral.
 
 ### 🔐 The Vault
 - An expandable **education matrix** covering the signs/symptoms of **clinical
@@ -52,7 +54,7 @@ Then open **http://localhost:3000** in your browser. Press **Ctrl + C** to stop.
 ### ⌨️ Keyboard shortcuts
 
 The dashboard is built for desktop — press **1**, **2**, or **3** to jump
-straight to the Stress Tracker, Communication Shield, or Vault.
+straight to the Stress Tracker, Reset Kit, or Vault.
 
 <details>
 <summary>Prefer a zero-install browser preview? (GitHub Codespaces)</summary>
@@ -82,7 +84,7 @@ MindArmor/
 ├── public/
 │   ├── index.html     # Dashboard shell (sidebar + 3 tabs)
 │   ├── styles.css     # Dark-mode design system
-│   ├── data.js        # Quiz, vault content & crisis resources
+│   ├── data.js        # Reset Kit, vault content & crisis resources
 │   └── app.js         # All client-side interactivity
 └── data/              # SQLite database (gitignored, auto-created)
 ```
@@ -95,8 +97,8 @@ MindArmor/
 | `POST` | `/api/stress`          | Create a check-in |
 | `DELETE` | `/api/stress/:id`    | Delete a check-in |
 | `GET`  | `/api/stress/stats`    | Aggregate stats (avg, streak, top habit) |
-| `GET`  | `/api/quiz/results`    | List saved quiz results |
-| `POST` | `/api/quiz/results`    | Save a quiz result |
+
+> The Reset Kit is client-only — it has no API and persists nothing.
 
 ---
 

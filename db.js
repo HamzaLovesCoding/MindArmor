@@ -24,13 +24,6 @@ db.exec(`
     note          TEXT    NOT NULL DEFAULT '',
     created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
   );
-
-  CREATE TABLE IF NOT EXISTS quiz_results (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    style         TEXT    NOT NULL,
-    scores        TEXT    NOT NULL DEFAULT '{}',
-    created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
-  );
 `);
 
 // ---------------------------------------------------------------------------
@@ -56,21 +49,6 @@ const getVibe = db.prepare(`
 const deleteVibe = db.prepare(`DELETE FROM vibe_entries WHERE id = ?`);
 
 // ---------------------------------------------------------------------------
-// Prepared statements — Quiz
-// ---------------------------------------------------------------------------
-const insertQuiz = db.prepare(`
-  INSERT INTO quiz_results (style, scores)
-  VALUES (@style, @scores)
-`);
-
-const listQuiz = db.prepare(`
-  SELECT id, style, scores, created_at
-  FROM quiz_results
-  ORDER BY datetime(created_at) DESC, id DESC
-  LIMIT @limit
-`);
-
-// ---------------------------------------------------------------------------
 // Row mappers
 // ---------------------------------------------------------------------------
 function mapVibe(row) {
@@ -82,18 +60,6 @@ function mapVibe(row) {
     stressLevel: row.stress_level,
     activities,
     note: row.note,
-    createdAt: row.created_at,
-  };
-}
-
-function mapQuiz(row) {
-  if (!row) return null;
-  let scores = {};
-  try { scores = JSON.parse(row.scores); } catch (_) { scores = {}; }
-  return {
-    id: row.id,
-    style: row.style,
-    scores,
     createdAt: row.created_at,
   };
 }
@@ -117,18 +83,6 @@ module.exports = {
 
   removeVibeEntry(id) {
     return deleteVibe.run(id).changes > 0;
-  },
-
-  addQuizResult({ style, scores }) {
-    const info = insertQuiz.run({
-      style,
-      scores: JSON.stringify(scores || {}),
-    });
-    return mapQuiz({ id: info.lastInsertRowid, style, scores: JSON.stringify(scores || {}), created_at: new Date().toISOString() });
-  },
-
-  getQuizResults(limit = 50) {
-    return listQuiz.all({ limit }).map(mapQuiz);
   },
 
   _db: db,

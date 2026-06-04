@@ -23,8 +23,6 @@ const KNOWN_ACTIVITIES = new Set([
   'hydration',
 ]);
 
-const VALID_STYLES = new Set(['Assertive', 'Passive', 'Aggressive']);
-
 // ---------------------------------------------------------------------------
 // Stress Tracker API
 // ---------------------------------------------------------------------------
@@ -99,23 +97,6 @@ app.get('/api/stress/stats', (req, res) => {
     currentStreak: streak,
     topActivity,
   });
-});
-
-// ---------------------------------------------------------------------------
-// Communication Shield API (persist quiz outcomes)
-// ---------------------------------------------------------------------------
-app.get('/api/quiz/results', (req, res) => {
-  res.json({ results: db.getQuizResults(50) });
-});
-
-app.post('/api/quiz/results', (req, res) => {
-  const { style, scores } = req.body || {};
-  if (!VALID_STYLES.has(style)) {
-    return res.status(400).json({ error: 'style must be Assertive, Passive, or Aggressive.' });
-  }
-  const cleanScores = (scores && typeof scores === 'object') ? scores : {};
-  const result = db.addQuizResult({ style, scores: cleanScores });
-  res.status(201).json({ result });
 });
 
 // ---------------------------------------------------------------------------
