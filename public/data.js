@@ -38,7 +38,7 @@ window.MA_DATA = {
     },
   ],
 
-  // ---------------- The Vault — education matrix ----------------
+  // ---------------- Resources — education matrix ----------------
   vault: [
     {
       id: 'depression',

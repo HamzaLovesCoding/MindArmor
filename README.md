@@ -4,7 +4,7 @@ A sleek, dark-mode **mental health & resilience dashboard**. MindArmor helps you
 track your daily wellbeing, reset when stress spikes, and find trusted
 support — all in one calm, focused interface.
 
-![tabs: Stress Tracker · Reset Kit · The Vault](https://img.shields.io/badge/tabs-Stress%20Tracker%20%C2%B7%20Reset%20Kit%20%C2%B7%20The%20Vault-7c5cff)
+![tabs: Stress Tracker · Reset Kit · Resources](https://img.shields.io/badge/tabs-Stress%20Tracker%20%C2%B7%20Reset%20Kit%20%C2%B7%20Resources-7c5cff)
 
 ---
 
@@ -25,7 +25,7 @@ support — all in one calm, focused interface.
   - **Progressive Muscle Relaxation** — auto-advancing tense/release sequence with a circular countdown.
 - Nothing is saved — the Reset Kit is intentionally ephemeral.
 
-### 🔐 The Vault
+### 📚 Resources
 - An expandable **education matrix** covering the signs/symptoms of **clinical
   depression**, the behaviors/dangers of **drug addiction**, and habits for
   **building resilience**.
@@ -54,7 +54,7 @@ Then open **http://localhost:3000** in your browser. Press **Ctrl + C** to stop.
 ### ⌨️ Keyboard shortcuts
 
 The dashboard is built for desktop — press **1**, **2**, or **3** to jump
-straight to the Stress Tracker, Reset Kit, or Vault.
+straight to the Stress Tracker, Reset Kit, or Resources.
 
 <details>
 <summary>Prefer a zero-install browser preview? (GitHub Codespaces)</summary>
@@ -84,7 +84,7 @@ MindArmor/
 ├── public/
 │   ├── index.html     # Dashboard shell (sidebar + 3 tabs)
 │   ├── styles.css     # Dark-mode design system
-│   ├── data.js        # Reset Kit, vault content & crisis resources
+│   ├── data.js        # Reset Kit, resources content & crisis info
 │   └── app.js         # All client-side interactivity
 └── data/              # SQLite database (gitignored, auto-created)
 ```

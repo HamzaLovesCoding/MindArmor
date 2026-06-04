@@ -75,7 +75,7 @@
     });
 
     // Desktop keyboard shortcuts: 1 / 2 / 3 jump between tabs.
-    const shortcuts = { '1': 'stress', '2': 'reset', '3': 'vault' };
+    const shortcuts = { '1': 'stress', '2': 'reset', '3': 'resources' };
     document.addEventListener('keydown', (e) => {
       if (modalOpen) return; // don't switch tabs behind an open exercise
       if (e.metaKey || e.ctrlKey || e.altKey) return;
