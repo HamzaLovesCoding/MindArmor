@@ -283,6 +283,19 @@ textarea:focus, input:focus { outline: none; border-color: var(--accent); }
 .reset-desc { margin: 0; color: var(--text-dim); font-size: 13.5px; line-height: 1.5; flex-grow: 1; }
 .reset-start { margin-top: 10px; width: 100%; }
 
+/* Contextual prompt shown in the Stress Tracker after a high-stress save */
+.reset-prompt { margin-top: 18px; text-align: center; }
+.reset-prompt[hidden] { display: none; }
+.reset-prompt-title { margin: 0 0 6px; font-size: 17px; }
+.reset-prompt-body { margin: 0 0 16px; color: var(--text-dim); font-size: 14px; }
+.reset-prompt .btn-block { margin-top: 0; }
+.reset-prompt-dismiss {
+  display: inline-block; margin-top: 12px; padding: 4px 8px;
+  background: none; border: none; color: var(--text-faint);
+  font-family: inherit; font-size: 13px; cursor: pointer; text-decoration: underline;
+}
+.reset-prompt-dismiss:hover { color: var(--text-dim); }
+
 /* Fullscreen exercise overlay */
 body.modal-open { overflow: hidden; }
 .exercise-overlay {

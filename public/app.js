@@ -215,7 +215,6 @@
           method: 'POST',
           body: JSON.stringify({ stressLevel, activities, note }),
         });
-        notify('Check-in saved ✓');
         // Reset form
         $$('#activityGrid .activity-chip').forEach((c) => {
           c.classList.remove('checked');
@@ -225,10 +224,37 @@
         slider.value = 5;
         updateReadout();
         loadStress();
+
+        // A hard day (stress >= 7) swaps the plain confirmation for a
+        // contextual nudge toward Box Breathing.
+        if (stressLevel >= 7) {
+          showResetPrompt();
+        } else {
+          hideResetPrompt();
+          notify('Check-in saved ✓');
+        }
       } catch (err) {
         notify(err.message, true);
       }
     });
+
+    // Contextual Reset Kit prompt (shown after a high-stress save).
+    $('#resetPromptStart').addEventListener('click', () => {
+      hideResetPrompt();
+      openExercise('box'); // reuse the Box Breathing modal from Reset Kit
+    });
+    $('#resetPromptDismiss').addEventListener('click', hideResetPrompt);
+  }
+
+  function showResetPrompt() {
+    const status = $('#formStatus');
+    if (status) status.classList.remove('show'); // clear any lingering "saved" text
+    $('#resetPrompt').hidden = false;
+    $('#resetPromptStart').focus();
+  }
+
+  function hideResetPrompt() {
+    $('#resetPrompt').hidden = true;
   }
 
   // =====================================================================

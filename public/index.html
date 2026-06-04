@@ -91,6 +91,13 @@
               <button type="submit" class="btn btn-primary btn-block">Save check-in</button>
               <p class="form-status" id="formStatus"></p>
             </form>
+
+            <div class="card reset-prompt" id="resetPrompt" role="status" hidden>
+              <h3 class="reset-prompt-title">That sounds like a hard day.</h3>
+              <p class="reset-prompt-body">Want to take 90 seconds to reset?</p>
+              <button class="btn btn-primary btn-block" id="resetPromptStart">Try Box Breathing</button>
+              <button type="button" class="reset-prompt-dismiss" id="resetPromptDismiss">Maybe later</button>
+            </div>
           </div>
 
           <!-- History feed -->
