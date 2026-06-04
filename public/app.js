@@ -21,14 +21,16 @@
     return data;
   }
 
-  let toastTimer;
-  function toast(msg, isError = false) {
-    const el = $('#toast');
+  // Inline, contextual status feedback shown beneath the check-in form.
+  let statusTimer;
+  function notify(msg, isError = false) {
+    const el = $('#formStatus');
+    if (!el) return;
     el.textContent = msg;
     el.classList.toggle('error', isError);
     el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => el.classList.remove('show'), 3200);
   }
 
   function escapeHtml(str) {
@@ -61,19 +63,29 @@
   // ---------------------------------------------------------------------
   // Tab navigation
   // ---------------------------------------------------------------------
+  function activateTab(tab) {
+    $$('.nav-item').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
+    $$('.tab-panel').forEach((p) => p.classList.toggle('active', p.id === `tab-${tab}`));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function initTabs() {
     $$('.nav-item').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const tab = btn.dataset.tab;
-        $$('.nav-item').forEach((b) => b.classList.toggle('active', b === btn));
-        $$('.tab-panel').forEach((p) => p.classList.toggle('active', p.id === `tab-${tab}`));
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+      btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+    });
+
+    // Desktop keyboard shortcuts: 1 / 2 / 3 jump between tabs.
+    const shortcuts = { '1': 'stress', '2': 'shield', '3': 'vault' };
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      const tab = shortcuts[e.key];
+      if (tab) { e.preventDefault(); activateTab(tab); }
     });
   }
 
   // =====================================================================
-  // VIBE TRACKER
+  // STRESS TRACKER
   // =====================================================================
   function renderActivityGrid() {
     const grid = $('#activityGrid');
@@ -118,11 +130,11 @@
   }
 
   function renderFeed(entries) {
-    const feed = $('#vibeFeed');
+    const feed = $('#stressFeed');
     $('#feedCount').textContent = entries.length ? `${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}` : '';
 
     if (!entries.length) {
-      feed.innerHTML = `<div class="feed-empty">No check-ins yet.<br>Log today's vibe to start your history.</div>`;
+      feed.innerHTML = `<div class="feed-empty">No check-ins yet.<br>Log today's check-in to start your history.</div>`;
       return;
     }
 
@@ -151,11 +163,11 @@
       btn.addEventListener('click', async () => {
         const id = btn.closest('.feed-item').dataset.id;
         try {
-          await api(`/api/vibes/${id}`, { method: 'DELETE' });
-          toast('Entry removed');
-          loadVibes();
+          await api(`/api/stress/${id}`, { method: 'DELETE' });
+          notify('Entry removed');
+          loadStress();
         } catch (err) {
-          toast(err.message, true);
+          notify(err.message, true);
         }
       });
     });
@@ -163,7 +175,7 @@
 
   async function renderStats() {
     try {
-      const s = await api('/api/vibes/stats');
+      const s = await api('/api/stress/stats');
       const set = (k, v) => { const el = $(`[data-stat="${k}"]`); if (el) el.textContent = v; };
       set('count', s.count);
       set('avg', s.avgStress == null ? '—' : s.avgStress);
@@ -172,17 +184,17 @@
     } catch (_) { /* non-critical */ }
   }
 
-  async function loadVibes() {
+  async function loadStress() {
     try {
-      const { entries } = await api('/api/vibes');
+      const { entries } = await api('/api/stress');
       renderFeed(entries);
       renderStats();
     } catch (err) {
-      toast('Could not load history', true);
+      notify('Could not load history', true);
     }
   }
 
-  function initVibeForm() {
+  function initStressForm() {
     const slider = $('#stress');
     const readout = $('#stressReadout');
     const updateReadout = () => {
@@ -192,17 +204,17 @@
     slider.addEventListener('input', updateReadout);
     updateReadout();
 
-    $('#vibeForm').addEventListener('submit', async (e) => {
+    $('#stressForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const stressLevel = Number(slider.value);
       const activities = $$('#activityGrid input:checked').map((i) => i.value);
       const note = $('#note').value.trim();
       try {
-        await api('/api/vibes', {
+        await api('/api/stress', {
           method: 'POST',
           body: JSON.stringify({ stressLevel, activities, note }),
         });
-        toast('Check-in saved 🎉');
+        notify('Check-in saved ✓');
         // Reset form
         $$('#activityGrid .activity-chip').forEach((c) => {
           c.classList.remove('checked');
@@ -211,9 +223,9 @@
         $('#note').value = '';
         slider.value = 5;
         updateReadout();
-        loadVibes();
+        loadStress();
       } catch (err) {
-        toast(err.message, true);
+        notify(err.message, true);
       }
     });
   }
@@ -414,8 +426,8 @@
   function init() {
     initTabs();
     renderActivityGrid();
-    initVibeForm();
-    loadVibes();
+    initStressForm();
+    loadStress();
     renderQuizIntro();
     renderVault();
   }

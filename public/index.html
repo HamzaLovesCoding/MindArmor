@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MindArmor — Mental Health & Resilience</title>
-  <meta name="description" content="MindArmor — track your vibe, shield your communication, and explore the support vault." />
+  <meta name="description" content="MindArmor — track your stress, shield your communication, and explore the support vault." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -16,7 +16,6 @@
     <!-- ===================== Sidebar ===================== -->
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-mark">🛡️</div>
         <div class="brand-text">
           <span class="brand-name">MindArmor</span>
           <span class="brand-tag">resilience, built daily</span>
@@ -24,17 +23,20 @@
       </div>
 
       <nav class="nav" aria-label="Primary">
-        <button class="nav-item active" data-tab="vibe">
+        <button class="nav-item active" data-tab="stress" title="Stress Tracker — press 1">
           <span class="nav-icon">📊</span>
-          <span class="nav-label">Vibe Tracker</span>
+          <span class="nav-label">Stress Tracker</span>
+          <kbd class="nav-key">1</kbd>
         </button>
-        <button class="nav-item" data-tab="shield">
+        <button class="nav-item" data-tab="shield" title="Communication Shield — press 2">
           <span class="nav-icon">🗣️</span>
           <span class="nav-label">Communication Shield</span>
+          <kbd class="nav-key">2</kbd>
         </button>
-        <button class="nav-item" data-tab="vault">
+        <button class="nav-item" data-tab="vault" title="The Vault — press 3">
           <span class="nav-icon">🔐</span>
           <span class="nav-label">The Vault</span>
+          <kbd class="nav-key">3</kbd>
         </button>
       </nav>
 
@@ -51,27 +53,27 @@
 
     <!-- ===================== Main ===================== -->
     <main class="main">
-      <!-- ---------- Vibe Tracker ---------- -->
-      <section class="tab-panel active" id="tab-vibe">
+      <!-- ---------- Stress Tracker ---------- -->
+      <section class="tab-panel active" id="tab-stress">
         <header class="page-head">
           <div>
-            <h1>Vibe Tracker</h1>
+            <h1>Stress Tracker</h1>
             <p class="subtitle">Log how today felt and the care you gave yourself.</p>
           </div>
         </header>
 
-        <div class="stat-strip" id="vibeStats">
+        <div class="stat-strip" id="stressStats">
           <div class="stat-card"><span class="stat-value" data-stat="count">—</span><span class="stat-label">Entries logged</span></div>
           <div class="stat-card"><span class="stat-value" data-stat="avg">—</span><span class="stat-label">Avg. stress</span></div>
           <div class="stat-card"><span class="stat-value" data-stat="streak">—</span><span class="stat-label">Day streak</span></div>
           <div class="stat-card"><span class="stat-value" data-stat="top">—</span><span class="stat-label">Top habit</span></div>
         </div>
 
-        <div class="vibe-grid">
+        <div class="stress-grid">
           <!-- Log form -->
           <div class="card log-card">
             <h2 class="card-title">Today's check-in</h2>
-            <form id="vibeForm">
+            <form id="stressForm">
               <label class="field-label" for="stress">
                 Stress level <span class="stress-readout" id="stressReadout">5</span>
               </label>
@@ -84,9 +86,10 @@
               </div>
 
               <label class="field-label" for="note">Note <span class="optional">(optional)</span></label>
-              <textarea id="note" name="note" rows="2" maxlength="500" placeholder="What shaped today's vibe?"></textarea>
+              <textarea id="note" name="note" rows="2" maxlength="500" placeholder="What shaped today's stress level?"></textarea>
 
               <button type="submit" class="btn btn-primary btn-block">Save check-in</button>
+              <p class="form-status" id="formStatus"></p>
             </form>
           </div>
 
@@ -96,7 +99,7 @@
               <h2 class="card-title">History feed</h2>
               <span class="muted" id="feedCount"></span>
             </div>
-            <div class="feed" id="vibeFeed">
+            <div class="feed" id="stressFeed">
               <!-- populated by app.js -->
             </div>
           </div>
@@ -156,8 +159,6 @@
       </section>
     </main>
   </div>
-
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="/data.js"></script>
   <script src="/app.js"></script>

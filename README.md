@@ -4,13 +4,13 @@ A sleek, dark-mode **mental health & resilience dashboard**. MindArmor helps you
 track your daily wellbeing, understand how you handle conflict, and find trusted
 support — all in one calm, focused interface.
 
-![tabs: Vibe Tracker · Communication Shield · The Vault](https://img.shields.io/badge/tabs-Vibe%20Tracker%20%C2%B7%20Communication%20Shield%20%C2%B7%20The%20Vault-7c5cff)
+![tabs: Stress Tracker · Communication Shield · The Vault](https://img.shields.io/badge/tabs-Stress%20Tracker%20%C2%B7%20Communication%20Shield%20%C2%B7%20The%20Vault-7c5cff)
 
 ---
 
 ## ✨ Features
 
-### 📊 Vibe Tracker
+### 📊 Stress Tracker
 - Log a daily **stress level (1–10)** with a live color-coded slider.
 - Check off **self-care activities** completed (sleep, exercise, mindfulness, nutrition, connection, time outdoors, journaling, hydration).
 - Entries are **saved to a SQLite database** and shown in a beautifully styled
@@ -32,33 +32,36 @@ support — all in one calm, focused interface.
 
 ---
 
-## 🚀 Getting started
+## 🚀 Getting started (desktop)
+
+You'll need [Node.js](https://nodejs.org) v18+ and Git.
 
 ```bash
+git clone https://github.com/HamzaLovesCoding/MindArmor.git
+cd MindArmor
+git checkout claude/mindarmor-mental-health-app-N5SEM
 npm install
 npm start
 ```
 
-Then open **http://localhost:3000**.
+Then open **http://localhost:3000** in your browser. Press **Ctrl + C** to stop.
 
-Set a custom port with `PORT=4000 npm start`.
+- Set a custom port with `PORT=4000 npm start`.
+- Run with auto-reload during development: `npm run dev`.
 
-> Run with auto-reload during development: `npm run dev`
+### ⌨️ Keyboard shortcuts
 
-### 📱 View it from a phone (GitHub Codespaces)
+The dashboard is built for desktop — press **1**, **2**, or **3** to jump
+straight to the Stress Tracker, Communication Shield, or Vault.
 
-No local setup needed — open it straight from GitHub:
+<details>
+<summary>Prefer a zero-install browser preview? (GitHub Codespaces)</summary>
 
-1. On github.com, switch to the `claude/mindarmor-mental-health-app-N5SEM` branch.
-2. Tap **Code → Codespaces → Create codespace on this branch**.
-3. Wait ~1 minute. The included [`.devcontainer`](.devcontainer/devcontainer.json)
-   runs `npm install` and starts the server automatically.
-4. When you see the **"Application running on port 3000"** notification, tap
-   **Open in Browser** (or open the **Ports** tab and tap the forwarded
-   `3000` address). It opens in your mobile browser.
-
-If the server didn't start, open a terminal in the Codespace and run `npm start`
-(logs are at `/tmp/mindarmor.log`).
+The repo ships a [`.devcontainer`](.devcontainer/devcontainer.json), so you can
+open it from **github.com → Code → Codespaces → Create codespace on this
+branch**. It runs `npm install`, starts the server, and forwards port `3000` —
+open it from the **Ports** tab. (Logs at `/tmp/mindarmor.log`.)
+</details>
 
 ---
 
@@ -88,10 +91,10 @@ MindArmor/
 
 | Method | Endpoint               | Purpose |
 |--------|------------------------|---------|
-| `GET`  | `/api/vibes`           | List check-ins |
-| `POST` | `/api/vibes`           | Create a check-in |
-| `DELETE` | `/api/vibes/:id`     | Delete a check-in |
-| `GET`  | `/api/vibes/stats`     | Aggregate stats (avg, streak, top habit) |
+| `GET`  | `/api/stress`          | List check-ins |
+| `POST` | `/api/stress`          | Create a check-in |
+| `DELETE` | `/api/stress/:id`    | Delete a check-in |
+| `GET`  | `/api/stress/stats`    | Aggregate stats (avg, streak, top habit) |
 | `GET`  | `/api/quiz/results`    | List saved quiz results |
 | `POST` | `/api/quiz/results`    | Save a quiz result |
 

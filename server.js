@@ -26,14 +26,14 @@ const KNOWN_ACTIVITIES = new Set([
 const VALID_STYLES = new Set(['Assertive', 'Passive', 'Aggressive']);
 
 // ---------------------------------------------------------------------------
-// Vibe Tracker API
+// Stress Tracker API
 // ---------------------------------------------------------------------------
-app.get('/api/vibes', (req, res) => {
+app.get('/api/stress', (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 100, 365);
   res.json({ entries: db.getVibeEntries(limit) });
 });
 
-app.post('/api/vibes', (req, res) => {
+app.post('/api/stress', (req, res) => {
   const { stressLevel, activities, note } = req.body || {};
   const level = Number(stressLevel);
 
@@ -51,7 +51,7 @@ app.post('/api/vibes', (req, res) => {
   res.status(201).json({ entry });
 });
 
-app.delete('/api/vibes/:id', (req, res) => {
+app.delete('/api/stress/:id', (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id)) return res.status(400).json({ error: 'Invalid id.' });
   const removed = db.removeVibeEntry(id);
@@ -60,7 +60,7 @@ app.delete('/api/vibes/:id', (req, res) => {
 });
 
 // Lightweight aggregate stats for the dashboard header.
-app.get('/api/vibes/stats', (req, res) => {
+app.get('/api/stress/stats', (req, res) => {
   const entries = db.getVibeEntries(365);
   if (entries.length === 0) {
     return res.json({ count: 0, avgStress: null, currentStreak: 0, topActivity: null });
