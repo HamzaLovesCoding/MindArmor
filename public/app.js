@@ -152,42 +152,6 @@
     });
   }
 
-  // HALT self-check — moment-in-time tips, nothing persisted.
-  function renderHalt() {
-    const grid = $('#haltGrid');
-    grid.innerHTML = D.halt.map((h) => `
-      <div class="activity-chip halt-chip" data-key="${h.key}" role="button" tabindex="0">
-        <span class="chip-emoji">${h.emoji}</span>
-        <span>${escapeHtml(h.label)}</span>
-      </div>
-    `).join('');
-
-    const tip = $('#haltTip');
-    const chips = $$('.halt-chip', grid);
-    chips.forEach((chip) => {
-      const item = D.halt.find((h) => h.key === chip.dataset.key);
-      const activate = () => {
-        const wasActive = chip.classList.contains('checked');
-        chips.forEach((c) => c.classList.remove('checked'));
-        if (wasActive) {
-          tip.hidden = true;
-          tip.innerHTML = '';
-          return;
-        }
-        chip.classList.add('checked');
-        tip.hidden = false;
-        tip.innerHTML = `<span class="halt-tip-text">${escapeHtml(item.tip)}</span>` +
-          (item.crisis
-            ? `<a class="btn btn-ghost halt-tip-btn" href="sms:741741?body=HOME">Open Crisis Text Line</a>`
-            : '');
-      };
-      chip.addEventListener('click', activate);
-      chip.addEventListener('keydown', (e) => {
-        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); activate(); }
-      });
-    });
-  }
-
   function progressRing(level) {
     const meta = stressMeta(level);
     const pct = level / 10;
@@ -741,7 +705,6 @@
     initTabs();
     renderActivityGrid();
     renderMoodGrid();
-    renderHalt();
     initStressForm();
     loadStress();
     renderResetKit();
