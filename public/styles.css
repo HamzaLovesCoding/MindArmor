@@ -279,8 +279,14 @@ textarea:focus, input:focus { outline: none; border-color: var(--accent); }
 /* ============================ Reset Kit ============================ */
 .gradient-text { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-.reset-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
-@media (min-width: 768px) { .reset-grid { grid-template-columns: repeat(3, 1fr); } }
+/* 2x2 on mobile (incl. 375px), 4-across on wider desktop. */
+.reset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+@media (min-width: 900px) { .reset-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 480px) {
+  .reset-card { padding: 22px 14px; gap: 8px; }
+  .reset-icon { width: 50px; height: 50px; font-size: 24px; margin-bottom: 2px; }
+  .reset-title { font-size: 15px; }
+}
 
 .reset-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 30px 22px; }
 .reset-icon {
@@ -375,6 +381,40 @@ body.modal-open { overflow: hidden; }
 .pmr-center span { font-family: 'Sora'; font-size: 40px; font-weight: 800; }
 .pmr-region { font-family: 'Sora'; font-size: 30px; font-weight: 800; text-transform: capitalize; }
 .pmr-action { font-size: 16px; color: var(--text-dim); margin-top: -10px; }
+
+/* Urge Surfing */
+.ex-urge { width: 100%; }
+.ex-urge .slider, .ex-urge .slider-scale, .urge-strength-label { width: 100%; max-width: 360px; }
+.urge-emoji { font-size: 52px; }
+.urge-body { color: var(--text-dim); line-height: 1.6; font-size: 15px; max-width: 380px; margin: 0; }
+.urge-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.urge-chip { user-select: none; }
+.urge-strength-label { justify-content: center; gap: 8px; margin: 4px 0 0; }
+
+.urge-wave-wrap {
+  position: relative; width: 100%; max-width: 380px; height: 200px;
+  border-radius: 16px; overflow: hidden;
+  background: var(--bg-input); border: 1px solid var(--border);
+}
+.urge-wave-svg { width: 100%; height: 100%; display: block; }
+.urge-countdown {
+  position: absolute; top: 10px; right: 12px; z-index: 1;
+  font-family: 'Sora'; font-weight: 700; font-size: 15px; color: var(--text);
+  background: rgba(10, 14, 26, 0.6); padding: 2px 9px; border-radius: 8px;
+}
+.urge-countdown-big { font-family: 'Sora'; font-weight: 800; font-size: 46px; }
+.urge-bar { width: 100%; max-width: 380px; height: 14px; background: var(--ring-track); border-radius: 99px; overflow: hidden; }
+.urge-bar-fill { height: 100%; width: 0%; background: var(--accent-grad); border-radius: 99px; }
+.urge-phase { margin: 0; font-size: 16px; font-weight: 600; }
+.ex-nav-row { display: flex; align-items: center; gap: 16px; }
+.btn-skip {
+  background: none; border: none; color: var(--text-faint); font-family: inherit;
+  font-size: 13px; cursor: pointer; text-decoration: underline; padding: 6px 8px;
+}
+.btn-skip:hover { color: var(--text-dim); }
+.urge-now { font-family: 'Sora'; font-size: 60px; font-weight: 800; line-height: 1; }
+.urge-compare { margin: 0; color: var(--text-dim); font-size: 14px; }
+.urge-closing { margin: 0; font-size: 16px; font-weight: 600; }
 
 /* ============================ Emergency Hub ============================ */
 .emergency-hub {

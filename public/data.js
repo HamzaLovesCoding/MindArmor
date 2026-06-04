@@ -45,6 +45,12 @@ window.MA_DATA = {
       title: 'Progressive Muscle Relaxation',
       desc: 'Release tension by tensing and relaxing muscle groups.',
     },
+    {
+      key: 'urge',
+      icon: '🌊',
+      title: 'Urge Surfing',
+      desc: 'Ride out a craving or intense urge for 3 minutes.',
+    },
   ],
 
   // ---------------- Resources — education matrix ----------------

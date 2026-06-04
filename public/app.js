@@ -377,7 +377,7 @@
     });
   }
 
-  const EXERCISES = { box: exBox, grounding: exGrounding, pmr: exPmr };
+  const EXERCISES = { box: exBox, grounding: exGrounding, pmr: exPmr, urge: exUrge };
 
   function openExercise(key, trigger) {
     const builder = EXERCISES[key];
@@ -634,6 +634,209 @@
 
     ticker.start(); // auto-advances through all regions
     return () => ticker.stop();
+  }
+
+  // ---------- Exercise 4: Urge Surfing ----------
+  function exUrge(stage) {
+    const reduce = prefersReducedMotion();
+    const urges = [
+      { key: 'substance', emoji: '🚬', label: 'Substance' },
+      { key: 'phone',     emoji: '📱', label: 'Phone/scroll' },
+      { key: 'food',      emoji: '🍪', label: 'Food' },
+      { key: 'lashout',   emoji: '💢', label: 'Lash out' },
+      { key: 'isolate',   emoji: '😢', label: 'Isolate' },
+      { key: 'other',     emoji: '✋', label: 'Something else' },
+    ];
+    let selectedUrge = '';
+    let startStrength = 7;
+    let ticker = null;
+    let introTimer = null;
+
+    function clearTimers() {
+      if (ticker) { ticker.stop(); ticker = null; }
+      if (introTimer) { clearTimeout(introTimer); introTimer = null; }
+    }
+
+    // Step 1 — Intro (auto-advances after 15s; "Begin" advances early).
+    function step1() {
+      clearTimers();
+      stage.innerHTML = `
+        <div class="ex ex-urge">
+          <div class="urge-emoji">🌊</div>
+          <h2 class="ex-title">Urges are like waves.</h2>
+          <p class="urge-body">They rise, peak, and fall — usually within minutes. You don't have to fight it. Just notice it.</p>
+          <button class="btn btn-primary ex-action" id="urgeBegin">Begin</button>
+        </div>`;
+      introTimer = setTimeout(step2, 15000);
+      $('#urgeBegin', stage).addEventListener('click', step2);
+    }
+
+    // Step 2 — Name the urge (no time limit).
+    function step2() {
+      clearTimers();
+      stage.innerHTML = `
+        <div class="ex ex-urge">
+          <h2 class="ex-title">What are you feeling pulled toward?</h2>
+          <div class="urge-chips" id="urgeChips">
+            ${urges.map((u) => `
+              <div class="activity-chip urge-chip" data-key="${u.key}" role="radio" aria-checked="false" tabindex="0">
+                <span class="chip-emoji">${u.emoji}</span><span>${escapeHtml(u.label)}</span>
+              </div>`).join('')}
+          </div>
+          <label class="field-label urge-strength-label" for="urgeStart">
+            How strong is the urge right now? <span class="stress-readout" id="urgeStartReadout">7</span>
+          </label>
+          <input type="range" id="urgeStart" min="1" max="10" value="7" class="slider" />
+          <div class="slider-scale"><span>Mild</span><span>Intense</span></div>
+          <button class="btn btn-primary ex-action" id="urgeSurf">Surf it</button>
+        </div>`;
+
+      const chips = $$('.urge-chip', stage);
+      chips.forEach((chip) => {
+        const select = () => {
+          const was = chip.classList.contains('checked');
+          chips.forEach((c) => { c.classList.remove('checked'); c.setAttribute('aria-checked', 'false'); });
+          if (!was) { chip.classList.add('checked'); chip.setAttribute('aria-checked', 'true'); selectedUrge = chip.dataset.key; }
+          else { selectedUrge = ''; }
+        };
+        chip.addEventListener('click', select);
+        chip.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); select(); } });
+      });
+
+      const slider = $('#urgeStart', stage);
+      const readout = $('#urgeStartReadout', stage);
+      slider.addEventListener('input', () => { readout.textContent = slider.value; });
+      $('#urgeSurf', stage).addEventListener('click', () => { startStrength = Number(slider.value); step3(); });
+    }
+
+    // Step 3 — The wave (180s). Animated sine wave, or a gradient bar under reduced motion.
+    function step3() {
+      clearTimers();
+      const TOTAL = 180000;
+      const W = 320;
+      const H = 200;
+      const SEG = 40;
+      let elapsed = 0;
+
+      const phaseText = (ms) => (ms < 60000
+        ? 'The wave is rising. Just watch.'
+        : ms < 90000
+          ? 'This is the peak. Stay with it.'
+          : "It's already passing. Notice.");
+      const mmss = (ms) => {
+        const s = Math.max(0, Math.ceil((TOTAL - ms) / 1000));
+        return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+      };
+
+      const nav = `
+        <p class="urge-phase" id="urgePhase">The wave is rising. Just watch.</p>
+        <div class="ex-nav-row">
+          <button class="btn btn-primary ex-action" id="urgeToggle">Pause</button>
+          <button type="button" class="btn-skip" id="urgeSkip">Skip</button>
+        </div>`;
+
+      if (reduce) {
+        stage.innerHTML = `
+          <div class="ex ex-urge ex-urge-wave">
+            <div class="urge-countdown-big" id="urgeTime">3:00</div>
+            <div class="urge-bar"><div class="urge-bar-fill" id="urgeBarFill"></div></div>
+            ${nav}
+          </div>`;
+      } else {
+        stage.innerHTML = `
+          <div class="ex ex-urge ex-urge-wave">
+            <div class="urge-wave-wrap">
+              <span class="urge-countdown" id="urgeTime">3:00</span>
+              <svg class="urge-wave-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="urgeGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#7c5cff" /><stop offset="100%" stop-color="#22d3ee" />
+                  </linearGradient>
+                  <linearGradient id="urgeFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="rgba(124,92,255,0.5)" /><stop offset="100%" stop-color="rgba(34,211,238,0.04)" />
+                  </linearGradient>
+                </defs>
+                <path id="urgeFillPath" fill="url(#urgeFill)" stroke="none" d="" />
+                <path id="urgeLine" fill="none" stroke="url(#urgeGrad)" stroke-width="3" stroke-linecap="round" d="" />
+              </svg>
+            </div>
+            ${nav}
+          </div>`;
+      }
+
+      const timeEl = $('#urgeTime', stage);
+      const phaseEl = $('#urgePhase', stage);
+      const toggle = $('#urgeToggle', stage);
+      const lineEl = reduce ? null : $('#urgeLine', stage);
+      const fillEl = reduce ? null : $('#urgeFillPath', stage);
+      const barFill = reduce ? $('#urgeBarFill', stage) : null;
+
+      // 0 → 1 over 0-60s, holds at 1 for 60-90s, 1 → 0 over 90-180s.
+      const intensity = (ms) => (ms < 60000
+        ? ms / 60000
+        : ms < 90000
+          ? 1
+          : Math.max(0, 1 - (ms - 90000) / 90000));
+
+      function drawWave(ms) {
+        const u = intensity(ms);
+        const level = H * (0.85 - u * 0.62); // water rises as the urge peaks
+        const amp = 7 + u * 10;
+        const phase = (ms / 1000) * 1.6;
+        let top = '';
+        for (let i = 0; i <= SEG; i++) {
+          const x = (i / SEG) * W;
+          const y = level - amp * Math.sin((i / SEG) * Math.PI * 4 + phase);
+          top += `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)} `;
+        }
+        lineEl.setAttribute('d', top.trim());
+        fillEl.setAttribute('d', `${top}L ${W} ${H} L 0 ${H} Z`);
+      }
+
+      ticker = makeTicker((dt) => {
+        elapsed += dt;
+        timeEl.textContent = mmss(elapsed);
+        phaseEl.textContent = phaseText(elapsed);
+        if (reduce) barFill.style.width = `${Math.min(elapsed / TOTAL, 1) * 100}%`;
+        else drawWave(elapsed);
+        if (elapsed >= TOTAL) { clearTimers(); step4(); }
+      });
+
+      toggle.addEventListener('click', () => {
+        if (ticker && ticker.running) { ticker.pause(); toggle.textContent = 'Resume'; }
+        else if (ticker) { ticker.start(); toggle.textContent = 'Pause'; }
+      });
+      $('#urgeSkip', stage).addEventListener('click', () => { clearTimers(); step4(); });
+
+      if (!reduce) drawWave(0);
+      ticker.start();
+    }
+
+    // Step 4 — Closing.
+    function step4() {
+      clearTimers();
+      stage.innerHTML = `
+        <div class="ex ex-urge">
+          <h2 class="ex-title">How strong is the urge now?</h2>
+          <div class="gradient-text urge-now" id="urgeNow">${startStrength}</div>
+          <input type="range" id="urgeEnd" min="1" max="10" value="${startStrength}" class="slider" />
+          <div class="slider-scale"><span>Mild</span><span>Intense</span></div>
+          <p class="urge-compare" id="urgeCompare">Started at ${startStrength}, now at ${startStrength}</p>
+          <p class="urge-closing">Urges pass. You stayed.</p>
+          <button class="btn btn-primary ex-action" id="urgeDone">Done</button>
+        </div>`;
+      const slider = $('#urgeEnd', stage);
+      const now = $('#urgeNow', stage);
+      const compare = $('#urgeCompare', stage);
+      slider.addEventListener('input', () => {
+        now.textContent = slider.value;
+        compare.textContent = `Started at ${startStrength}, now at ${slider.value}`;
+      });
+      $('#urgeDone', stage).addEventListener('click', closeExercise);
+    }
+
+    step1();
+    return () => clearTimers();
   }
 
   // =====================================================================
