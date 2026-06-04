@@ -213,6 +213,25 @@ a { color: var(--accent-2); }
 .activity-chip .chip-tick { margin-left: auto; opacity: 0; transition: opacity 0.16s; color: var(--accent-2); font-weight: 800; }
 .activity-chip.checked .chip-tick { opacity: 1; }
 
+/* Mood chips — single-select, reuse the self-care chip look (.checked) */
+.mood-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.mood-chip { user-select: none; }
+
+/* HALT self-check card */
+.halt-sub { margin: -12px 0 16px; color: var(--text-dim); font-size: 13.5px; }
+.halt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (min-width: 768px) { .halt-grid { grid-template-columns: repeat(4, 1fr); } }
+.halt-chip { justify-content: center; }
+.halt-tip {
+  margin-top: 14px; padding: 13px 15px;
+  background: rgba(124, 92, 255, 0.1); border: 1px solid rgba(124, 92, 255, 0.3);
+  border-radius: 11px; font-size: 13.5px; color: var(--text);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+}
+.halt-tip[hidden] { display: none; }
+.halt-tip-text { line-height: 1.45; flex: 1 1 180px; }
+.halt-tip-btn { padding: 8px 14px; font-size: 12.5px; white-space: nowrap; }
+
 textarea, input[type="text"] {
   width: 100%; background: var(--bg-input); border: 1px solid var(--border);
   border-radius: 11px; color: var(--text); padding: 12px 14px; font-family: inherit; font-size: 14px;
@@ -256,6 +275,10 @@ textarea:focus, input:focus { outline: none; border-color: var(--accent); }
   font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px;
   text-transform: uppercase; letter-spacing: 0.03em;
 }
+.feed-mood {
+  background: var(--bg-input); border: 1px solid var(--border); color: var(--text-dim);
+  text-transform: none; letter-spacing: 0;
+}
 .feed-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .feed-tag {
   font-size: 11.5px; background: var(--bg-input); border: 1px solid var(--border);
@@ -295,6 +318,10 @@ textarea:focus, input:focus { outline: none; border-color: var(--accent); }
   font-family: inherit; font-size: 13px; cursor: pointer; text-decoration: underline;
 }
 .reset-prompt-dismiss:hover { color: var(--text-dim); }
+
+/* Crisis escalation — danger-tinted variant of the prompt card */
+.crisis-prompt { border-color: rgba(255, 77, 109, 0.45); box-shadow: 0 0 36px -16px rgba(255, 77, 109, 0.55); }
+.crisis-prompt .reset-prompt-title { color: #ffd7df; }
 
 /* Fullscreen exercise overlay */
 body.modal-open { overflow: hidden; }

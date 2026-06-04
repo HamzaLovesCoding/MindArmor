@@ -15,6 +15,23 @@ window.MA_DATA = {
     { key: 'hydration',   label: 'Hydration',      emoji: '💧' },
   ],
 
+  // ---------------- Mood options (single-select on the check-in) ----------------
+  moods: [
+    { key: 'anxious', label: 'Anxious', emoji: '😰' },
+    { key: 'sad',     label: 'Sad',     emoji: '😔' },
+    { key: 'angry',   label: 'Angry',   emoji: '😠' },
+    { key: 'numb',    label: 'Numb',    emoji: '😶' },
+    { key: 'hopeful', label: 'Hopeful', emoji: '🙂' },
+  ],
+
+  // ---------------- HALT self-check (moment-in-time, not persisted) ----------------
+  halt: [
+    { key: 'hungry', emoji: '🍎', label: 'Hungry', tip: 'Eat something with protein. Mood often follows blood sugar.' },
+    { key: 'angry',  emoji: '😤', label: 'Angry',  tip: 'Step away for 60 seconds. Try Box Breathing.' },
+    { key: 'lonely', emoji: '🫥', label: 'Lonely', tip: 'Text one person. Doesn’t have to be deep.', crisis: true },
+    { key: 'tired',  emoji: '😴', label: 'Tired',  tip: 'Even 10 minutes of rest is real rest.' },
+  ],
+
   // ---------------- Reset Kit (grounding / breathing tools) ----------------
   // Card metadata only; the interactive logic lives in app.js.
   resetKit: [

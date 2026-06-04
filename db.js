@@ -21,28 +21,35 @@ db.exec(`
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     stress_level  INTEGER NOT NULL CHECK (stress_level BETWEEN 1 AND 10),
     activities    TEXT    NOT NULL DEFAULT '[]',
+    mood          TEXT    NOT NULL DEFAULT '',
     note          TEXT    NOT NULL DEFAULT '',
     created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
   );
 `);
 
+// Migrate older databases that predate the mood column.
+const hasMood = db.prepare(`PRAGMA table_info(vibe_entries)`).all().some((c) => c.name === 'mood');
+if (!hasMood) {
+  db.exec(`ALTER TABLE vibe_entries ADD COLUMN mood TEXT NOT NULL DEFAULT ''`);
+}
+
 // ---------------------------------------------------------------------------
 // Prepared statements — Vibe Tracker
 // ---------------------------------------------------------------------------
 const insertVibe = db.prepare(`
-  INSERT INTO vibe_entries (stress_level, activities, note)
-  VALUES (@stress_level, @activities, @note)
+  INSERT INTO vibe_entries (stress_level, activities, mood, note)
+  VALUES (@stress_level, @activities, @mood, @note)
 `);
 
 const listVibes = db.prepare(`
-  SELECT id, stress_level, activities, note, created_at
+  SELECT id, stress_level, activities, mood, note, created_at
   FROM vibe_entries
   ORDER BY datetime(created_at) DESC, id DESC
   LIMIT @limit
 `);
 
 const getVibe = db.prepare(`
-  SELECT id, stress_level, activities, note, created_at
+  SELECT id, stress_level, activities, mood, note, created_at
   FROM vibe_entries WHERE id = ?
 `);
 
@@ -59,6 +66,7 @@ function mapVibe(row) {
     id: row.id,
     stressLevel: row.stress_level,
     activities,
+    mood: row.mood || '',
     note: row.note,
     createdAt: row.created_at,
   };
@@ -68,10 +76,11 @@ function mapVibe(row) {
 // Public API
 // ---------------------------------------------------------------------------
 module.exports = {
-  addVibeEntry({ stressLevel, activities, note }) {
+  addVibeEntry({ stressLevel, activities, mood, note }) {
     const info = insertVibe.run({
       stress_level: stressLevel,
       activities: JSON.stringify(Array.isArray(activities) ? activities : []),
+      mood: String(mood || ''),
       note: String(note || ''),
     });
     return mapVibe(getVibe.get(info.lastInsertRowid));

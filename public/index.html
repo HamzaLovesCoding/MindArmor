@@ -69,6 +69,16 @@
           <div class="stat-card"><span class="stat-value" data-stat="top">—</span><span class="stat-label">Top habit</span></div>
         </div>
 
+        <!-- HALT self-check (moment-in-time, not saved) -->
+        <div class="card halt-card">
+          <h2 class="card-title">HALT check</h2>
+          <p class="halt-sub">Feeling off? It's often one of these.</p>
+          <div class="halt-grid" id="haltGrid">
+            <!-- populated by app.js -->
+          </div>
+          <div class="halt-tip" id="haltTip" role="status" hidden></div>
+        </div>
+
         <div class="stress-grid">
           <!-- Log form -->
           <div class="card log-card">
@@ -79,6 +89,11 @@
               </label>
               <input type="range" id="stress" name="stress" min="1" max="10" value="5" class="slider" />
               <div class="slider-scale"><span>Calm</span><span>Overwhelmed</span></div>
+
+              <label class="field-label">Mood</label>
+              <div class="mood-grid" id="moodGrid" role="radiogroup" aria-label="Mood">
+                <!-- populated by app.js -->
+              </div>
 
               <label class="field-label">Self-care completed</label>
               <div class="activity-grid" id="activityGrid">
@@ -97,6 +112,13 @@
               <p class="reset-prompt-body">Want to take 90 seconds to reset?</p>
               <button class="btn btn-primary btn-block" id="resetPromptStart">Try Box Breathing</button>
               <button type="button" class="reset-prompt-dismiss" id="resetPromptDismiss">Maybe later</button>
+            </div>
+
+            <div class="card reset-prompt crisis-prompt" id="crisisPrompt" role="status" hidden>
+              <h3 class="reset-prompt-title">That's a lot to carry.</h3>
+              <p class="reset-prompt-body">If things feel overwhelming, you don't have to handle this alone.</p>
+              <a class="btn btn-primary btn-block" id="crisisPromptText" href="sms:741741?body=HOME">Text 741741</a>
+              <button type="button" class="reset-prompt-dismiss" id="crisisPromptDismiss">I'm okay, just logging</button>
             </div>
           </div>
 

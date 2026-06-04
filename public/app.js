@@ -116,6 +116,78 @@
     });
   }
 
+  // Single-select mood chips. Reuse the self-care chip's active style (.checked).
+  function renderMoodGrid() {
+    const grid = $('#moodGrid');
+    grid.innerHTML = D.moods.map((m) => `
+      <div class="activity-chip mood-chip" data-key="${m.key}" role="radio" aria-checked="false" tabindex="0">
+        <span class="chip-emoji">${m.emoji}</span>
+        <span>${escapeHtml(m.label)}</span>
+      </div>
+    `).join('');
+
+    const chips = $$('.mood-chip', grid);
+    chips.forEach((chip) => {
+      const select = () => {
+        const wasSelected = chip.classList.contains('checked');
+        chips.forEach((c) => { c.classList.remove('checked'); c.setAttribute('aria-checked', 'false'); });
+        if (!wasSelected) { chip.classList.add('checked'); chip.setAttribute('aria-checked', 'true'); }
+      };
+      chip.addEventListener('click', select);
+      chip.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); select(); }
+      });
+    });
+  }
+
+  function selectedMood() {
+    const chip = $('#moodGrid .mood-chip.checked');
+    return chip ? chip.dataset.key : '';
+  }
+
+  function clearMood() {
+    $$('#moodGrid .mood-chip').forEach((c) => {
+      c.classList.remove('checked');
+      c.setAttribute('aria-checked', 'false');
+    });
+  }
+
+  // HALT self-check — moment-in-time tips, nothing persisted.
+  function renderHalt() {
+    const grid = $('#haltGrid');
+    grid.innerHTML = D.halt.map((h) => `
+      <div class="activity-chip halt-chip" data-key="${h.key}" role="button" tabindex="0">
+        <span class="chip-emoji">${h.emoji}</span>
+        <span>${escapeHtml(h.label)}</span>
+      </div>
+    `).join('');
+
+    const tip = $('#haltTip');
+    const chips = $$('.halt-chip', grid);
+    chips.forEach((chip) => {
+      const item = D.halt.find((h) => h.key === chip.dataset.key);
+      const activate = () => {
+        const wasActive = chip.classList.contains('checked');
+        chips.forEach((c) => c.classList.remove('checked'));
+        if (wasActive) {
+          tip.hidden = true;
+          tip.innerHTML = '';
+          return;
+        }
+        chip.classList.add('checked');
+        tip.hidden = false;
+        tip.innerHTML = `<span class="halt-tip-text">${escapeHtml(item.tip)}</span>` +
+          (item.crisis
+            ? `<a class="btn btn-ghost halt-tip-btn" href="sms:741741?body=HOME">Open Crisis Text Line</a>`
+            : '');
+      };
+      chip.addEventListener('click', activate);
+      chip.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); activate(); }
+      });
+    });
+  }
+
   function progressRing(level) {
     const meta = stressMeta(level);
     const pct = level / 10;
@@ -138,6 +210,10 @@
     return a ? `${a.emoji} ${a.label}` : key;
   }
 
+  function moodMeta(key) {
+    return D.moods.find((m) => m.key === key) || null;
+  }
+
   function renderFeed(entries) {
     const feed = $('#stressFeed');
     $('#feedCount').textContent = entries.length ? `${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}` : '';
@@ -153,6 +229,10 @@
         ? `<div class="feed-tags">${e.activities.map((k) => `<span class="feed-tag">${escapeHtml(activityLabel(k))}</span>`).join('')}</div>`
         : `<div class="feed-tags"><span class="feed-tag" style="opacity:.6">No activities logged</span></div>`;
       const note = e.note ? `<div class="feed-note">“${escapeHtml(e.note)}”</div>` : '';
+      const mood = moodMeta(e.mood);
+      const moodBadge = mood
+        ? `<span class="feed-badge feed-mood">${mood.emoji} ${escapeHtml(mood.label)}</span>`
+        : '';
       return `
         <div class="feed-item" data-id="${e.id}">
           ${progressRing(e.stressLevel)}
@@ -160,6 +240,7 @@
             <div class="feed-top">
               <span class="feed-date">${formatDate(e.createdAt)}</span>
               <span class="feed-badge" style="background:${meta.bg};color:${meta.fg}">${meta.label} stress</span>
+              ${moodBadge}
             </div>
             ${tags}
             ${note}
@@ -217,11 +298,12 @@
       e.preventDefault();
       const stressLevel = Number(slider.value);
       const activities = $$('#activityGrid input:checked').map((i) => i.value);
+      const mood = selectedMood();
       const note = $('#note').value.trim();
       try {
         await api('/api/stress', {
           method: 'POST',
-          body: JSON.stringify({ stressLevel, activities, note }),
+          body: JSON.stringify({ stressLevel, activities, mood, note }),
         });
         // Reset form
         $$('#activityGrid .activity-chip').forEach((c) => {
@@ -229,19 +311,12 @@
           c.setAttribute('aria-checked', 'false');
           $('input', c).checked = false;
         });
+        clearMood();
         $('#note').value = '';
         slider.value = 5;
         updateReadout();
         loadStress();
-
-        // A hard day (stress >= 7) swaps the plain confirmation for a
-        // contextual nudge toward Box Breathing.
-        if (stressLevel >= 7) {
-          showResetPrompt();
-        } else {
-          hideResetPrompt();
-          notify('Check-in saved ✓');
-        }
+        showSuccessState(stressLevel);
       } catch (err) {
         notify(err.message, true);
       }
@@ -253,18 +328,35 @@
       openExercise('box'); // reuse the Box Breathing modal from Reset Kit
     });
     $('#resetPromptDismiss').addEventListener('click', hideResetPrompt);
+    $('#crisisPromptDismiss').addEventListener('click', hideCrisisPrompt);
+  }
+
+  // Decide which confirmation to show based on stress severity.
+  function showSuccessState(level) {
+    hideResetPrompt();
+    hideCrisisPrompt();
+    const status = $('#formStatus');
+    if (status) status.classList.remove('show'); // clear any lingering "saved" text
+    if (level >= 9) {
+      showCrisisPrompt();
+    } else if (level >= 7) {
+      showResetPrompt();
+    } else {
+      notify('Check-in saved ✓');
+    }
   }
 
   function showResetPrompt() {
-    const status = $('#formStatus');
-    if (status) status.classList.remove('show'); // clear any lingering "saved" text
     $('#resetPrompt').hidden = false;
     $('#resetPromptStart').focus();
   }
+  function hideResetPrompt() { $('#resetPrompt').hidden = true; }
 
-  function hideResetPrompt() {
-    $('#resetPrompt').hidden = true;
+  function showCrisisPrompt() {
+    $('#crisisPrompt').hidden = false;
+    $('#crisisPromptText').focus();
   }
+  function hideCrisisPrompt() { $('#crisisPrompt').hidden = true; }
 
   // =====================================================================
   // RESET KIT (grounding & breathing tools)
@@ -648,6 +740,8 @@
   function init() {
     initTabs();
     renderActivityGrid();
+    renderMoodGrid();
+    renderHalt();
     initStressForm();
     loadStress();
     renderResetKit();

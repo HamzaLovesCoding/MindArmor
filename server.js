@@ -23,6 +23,9 @@ const KNOWN_ACTIVITIES = new Set([
   'hydration',
 ]);
 
+// Moods the check-in form offers (single-select). Empty string = no mood.
+const KNOWN_MOODS = new Set(['anxious', 'sad', 'angry', 'numb', 'hopeful']);
+
 // ---------------------------------------------------------------------------
 // Stress Tracker API
 // ---------------------------------------------------------------------------
@@ -32,7 +35,7 @@ app.get('/api/stress', (req, res) => {
 });
 
 app.post('/api/stress', (req, res) => {
-  const { stressLevel, activities, note } = req.body || {};
+  const { stressLevel, activities, mood, note } = req.body || {};
   const level = Number(stressLevel);
 
   if (!Number.isInteger(level) || level < 1 || level > 10) {
@@ -43,9 +46,10 @@ app.post('/api/stress', (req, res) => {
     ? [...new Set(activities.filter((a) => KNOWN_ACTIVITIES.has(a)))]
     : [];
 
+  const cleanMood = KNOWN_MOODS.has(mood) ? mood : '';
   const cleanNote = typeof note === 'string' ? note.slice(0, 500) : '';
 
-  const entry = db.addVibeEntry({ stressLevel: level, activities: cleanActivities, note: cleanNote });
+  const entry = db.addVibeEntry({ stressLevel: level, activities: cleanActivities, mood: cleanMood, note: cleanNote });
   res.status(201).json({ entry });
 });
 
