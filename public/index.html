@@ -116,14 +116,29 @@
             </div>
           </div>
 
-          <!-- History feed -->
-          <div class="card feed-card">
-            <div class="card-head-row">
-              <h2 class="card-title" data-i18n="stress.feedTitle">History feed</h2>
-              <span class="muted" id="feedCount"></span>
+          <!-- Right column: history feed + Guided Reframe stacked -->
+          <div class="stress-right">
+            <div class="card feed-card">
+              <div class="card-head-row">
+                <h2 class="card-title" data-i18n="stress.feedTitle">History feed</h2>
+                <span class="muted" id="feedCount"></span>
+              </div>
+              <div class="feed" id="stressFeed">
+                <!-- populated by app.js -->
+              </div>
             </div>
-            <div class="feed" id="stressFeed">
-              <!-- populated by app.js -->
+
+            <!-- Guided Reframe entry card -->
+            <div class="card reframe-card">
+              <div class="reframe-head">
+                <span class="reframe-icon">🧠</span>
+                <div>
+                  <h2 class="card-title" data-i18n="reframe.title">Guided Reframe</h2>
+                  <p class="reframe-subtitle" data-i18n="reframe.subtitle">Stuck on a stressful thought? Examine it with structured CBT steps.</p>
+                </div>
+              </div>
+              <p class="reframe-body" data-i18n="reframe.body">Type one thought, and a guided assistant will name the thinking pattern, explain how it distorts, offer a balanced alternative, and suggest one small action.</p>
+              <button class="btn btn-primary btn-block" id="reframeOpen" data-i18n="reframe.cta">Examine a thought</button>
             </div>
           </div>
         </div>
@@ -187,6 +202,12 @@
   <div class="exercise-overlay" id="exerciseOverlay" role="dialog" aria-modal="true" aria-label="Reset exercise" hidden>
     <button class="exercise-close" id="exerciseClose" aria-label="Close exercise">✕</button>
     <div class="exercise-stage" id="exerciseStage"></div>
+  </div>
+
+  <!-- Guided Reframe fullscreen overlay -->
+  <div class="exercise-overlay" id="reframeOverlay" role="dialog" aria-modal="true" data-i18n-aria="reframe.title" aria-label="Guided Reframe" hidden>
+    <button class="exercise-close" id="reframeClose" data-i18n-aria="reframe.close" aria-label="Close">✕</button>
+    <div class="exercise-stage reframe-stage" id="reframeStage"></div>
   </div>
 
   <script src="/messages.js"></script>

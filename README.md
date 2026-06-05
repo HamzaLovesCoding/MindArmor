@@ -16,6 +16,13 @@ support — all in one calm, focused interface.
 - Entries are **saved to a SQLite database** and shown in a beautifully styled
   **history feed with visual progress rings**.
 - A stat strip surfaces your entry count, average stress, logging **streak**, and most-frequent habit.
+- **🧠 Guided Reframe (AI)** — type one stressful thought and a CBT-trained
+  assistant names the cognitive distortion, explains how it misleads, offers a
+  balanced reframe in your voice, and suggests one small action. If the thought
+  signals crisis, it replaces the reframe with crisis resources (988 / 741741).
+  Powered by the Claude API **server-side** (the key never reaches the browser);
+  works in English and Spanish. Requires `ANTHROPIC_API_KEY` (see below) — without
+  it the rest of the app is unaffected and the tool degrades gracefully.
 
 ### 🌬️ Reset Kit
 - Three evidence-based grounding/breathing tools, each launched in a focused
@@ -59,6 +66,20 @@ Then open **http://localhost:3000** in your browser. Press **Ctrl + C** to stop.
 - Set a custom port with `PORT=4000 npm start`.
 - Run with auto-reload during development: `npm run dev`.
 
+**Guided Reframe (AI) setup.** Export an Anthropic API key before starting so the
+server-side proxy can reach the Claude API:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+# optional — defaults to claude-sonnet-4-6
+export ANTHROPIC_MODEL=claude-sonnet-4-6
+npm start
+```
+
+The key stays on the server; the browser only ever sends the single thought.
+Without a key the app still runs — the reframe tool just shows a friendly
+"couldn't reach the assistant" message.
+
 ### ⌨️ Keyboard shortcuts
 
 The dashboard is built for desktop — press **1**, **2**, or **3** to jump
@@ -89,6 +110,8 @@ open it from the **Ports** tab. (Logs at `/tmp/mindarmor.log`.)
 MindArmor/
 ├── server.js          # Express server + REST API
 ├── db.js              # SQLite schema + data access layer
+├── reframe.js         # Guided Reframe — Claude API call, crisis backstop, JSON parse
+├── messages/          # i18n bundles (en.json, es.json)
 ├── public/
 │   ├── index.html     # Dashboard shell (sidebar + 3 tabs)
 │   ├── styles.css     # Dark-mode design system
@@ -105,8 +128,11 @@ MindArmor/
 | `POST` | `/api/stress`          | Create a check-in |
 | `DELETE` | `/api/stress/:id`    | Delete a check-in |
 | `GET`  | `/api/stress/stats`    | Aggregate stats (avg, streak, top habit) |
+| `POST` | `/api/reframe`         | Guided Reframe — proxies one thought to the Claude API, returns structured CBT JSON |
 
 > The Reset Kit is client-only — it has no API and persists nothing.
+> `/api/reframe` sends **only** the single thought (plus locale) to the model —
+> no check-in history, name, or other data — and the API key lives only on the server.
 
 ---
 

@@ -126,7 +126,7 @@
     // Desktop keyboard shortcuts: 1 / 2 / 3 jump between tabs.
     const shortcuts = { '1': 'stress', '2': 'reset', '3': 'resources' };
     document.addEventListener('keydown', (e) => {
-      if (modalOpen) return; // don't switch tabs behind an open exercise
+      if (modalOpen || reframeOpen) return; // don't switch tabs behind a modal
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
       const tab = shortcuts[e.key];
@@ -998,6 +998,7 @@
     }
 
     if (modalOpen && currentExerciseKey) openExercise(currentExerciseKey);
+    if (reframeOpen) renderReframeView();
     updateLangToggle();
   }
 
@@ -1015,6 +1016,197 @@
     updateLangToggle();
   }
 
+  // =====================================================================
+  // GUIDED REFRAME (AI-powered CBT) — server-proxied, single-shot.
+  // =====================================================================
+  let reframeOpen = false;
+  const reframeState = { view: 'capture', data: null, thought: '', saved: false };
+
+  function renderReframe() {
+    $('#reframeOpen').addEventListener('click', openReframe);
+    $('#reframeClose').addEventListener('click', closeReframe);
+    document.addEventListener('keydown', (e) => {
+      if (reframeOpen && e.key === 'Escape') { e.preventDefault(); closeReframe(); }
+    });
+  }
+
+  function openReframe() {
+    reframeState.view = 'capture';
+    reframeState.data = null;
+    reframeState.thought = '';
+    reframeState.saved = false;
+    renderReframeView();
+    $('#reframeOverlay').hidden = false;
+    document.body.classList.add('modal-open');
+    reframeOpen = true;
+    const ta = $('#reframeInput');
+    if (ta) ta.focus();
+  }
+
+  function closeReframe() {
+    $('#reframeOverlay').hidden = true;
+    $('#reframeStage').innerHTML = '';
+    document.body.classList.remove('modal-open');
+    reframeOpen = false;
+    $('#reframeOpen').focus();
+  }
+
+  const reframeDisclaimer = () =>
+    `<p class="reframe-disclaimer">${escapeHtml(t('reframe.disclaimer'))}</p>`;
+
+  function renderReframeView() {
+    switch (reframeState.view) {
+      case 'loading': return renderReframeLoading();
+      case 'result': return renderReframeResult(reframeState.data);
+      case 'crisis': return renderReframeCrisis();
+      case 'error': return renderReframeError();
+      default: return renderReframeCapture();
+    }
+  }
+
+  function renderReframeCapture() {
+    const stage = $('#reframeStage');
+    stage.innerHTML = `
+      <div class="reframe-view">
+        <h2 class="ex-title">${escapeHtml(t('reframe.step1Title'))}</h2>
+        <textarea id="reframeInput" class="reframe-input" rows="4" maxlength="500"
+          placeholder="${escapeHtml(t('reframe.placeholder'))}">${escapeHtml(reframeState.thought)}</textarea>
+        <p class="reframe-status" id="reframeStatus" hidden></p>
+        <button class="btn btn-primary ex-action" id="reframeSubmit">${escapeHtml(t('reframe.examine'))}</button>
+        ${reframeDisclaimer()}
+      </div>`;
+    const ta = $('#reframeInput', stage);
+    ta.addEventListener('input', () => { reframeState.thought = ta.value; });
+    $('#reframeSubmit', stage).addEventListener('click', submitReframe);
+  }
+
+  function renderReframeLoading() {
+    $('#reframeStage').innerHTML = `
+      <div class="reframe-view reframe-loading">
+        <div class="reframe-spinner" aria-hidden="true"></div>
+        <p class="urge-phase">${escapeHtml(t('reframe.loading'))}</p>
+      </div>`;
+  }
+
+  function renderReframeResult(d) {
+    d = d || {};
+    const stage = $('#reframeStage');
+    const section = (title, body, extra = '') => `
+      <div class="reframe-section">
+        <h3 class="reframe-section-title">${escapeHtml(title)}</h3>
+        ${extra}
+        ${body ? `<p>${escapeHtml(body)}</p>` : ''}
+      </div>`;
+    const distortion = d.distortion
+      ? `<div class="reframe-distortion">${escapeHtml(d.distortion)}</div>` : '';
+    stage.innerHTML = `
+      <div class="reframe-view reframe-result">
+        ${section(t('reframe.patternTitle'), d.distortion_explanation, distortion)}
+        ${section(t('reframe.whyTitle'), d.why_it_misleads)}
+        ${section(t('reframe.reframeTitle'), d.reframe)}
+        ${section(t('reframe.actionTitle'), d.action)}
+        <div class="reframe-actions">
+          <button class="btn btn-ghost" id="reframeAnother">${escapeHtml(t('reframe.another'))}</button>
+          <button class="btn btn-primary" id="reframeDone">${escapeHtml(t('reframe.done'))}</button>
+        </div>
+        <button type="button" class="reframe-save" id="reframeSave">${escapeHtml(reframeState.saved ? t('reframe.saved') : t('reframe.save'))}</button>
+        ${reframeDisclaimer()}
+      </div>`;
+    $('#reframeAnother', stage).addEventListener('click', () => {
+      reframeState.view = 'capture';
+      reframeState.thought = '';
+      reframeState.data = null;
+      reframeState.saved = false;
+      renderReframeView();
+      const ta = $('#reframeInput'); if (ta) ta.focus();
+    });
+    $('#reframeDone', stage).addEventListener('click', closeReframe);
+    const saveBtn = $('#reframeSave', stage);
+    if (reframeState.saved) saveBtn.disabled = true;
+    saveBtn.addEventListener('click', () => {
+      saveReframe();
+      reframeState.saved = true;
+      saveBtn.textContent = t('reframe.saved');
+      saveBtn.disabled = true;
+    });
+  }
+
+  function renderReframeCrisis() {
+    const stage = $('#reframeStage');
+    stage.innerHTML = `
+      <div class="reframe-view reframe-crisis">
+        <div class="ex-done-emoji">💛</div>
+        <h2 class="ex-title">${escapeHtml(t('reframe.crisisTitle'))}</h2>
+        <p class="reframe-crisis-body">${escapeHtml(t('reframe.crisisBody'))}</p>
+        <div class="reframe-crisis-actions">
+          <a class="btn btn-primary" href="tel:988">${escapeHtml(t('reframe.crisisCall'))}</a>
+          <a class="btn btn-primary" href="sms:741741?body=HOME">${escapeHtml(t('reframe.crisisText'))}</a>
+        </div>
+        <p class="reframe-reassure">${escapeHtml(t('reframe.crisisReassure'))}</p>
+        <button class="btn btn-ghost" id="reframeCrisisClose">${escapeHtml(t('reframe.close'))}</button>
+        ${reframeDisclaimer()}
+      </div>`;
+    $('#reframeCrisisClose', stage).addEventListener('click', closeReframe);
+  }
+
+  function renderReframeError() {
+    const stage = $('#reframeStage');
+    stage.innerHTML = `
+      <div class="reframe-view reframe-error">
+        <div class="ex-done-emoji">⚠️</div>
+        <p class="reframe-error-msg">${escapeHtml(t('reframe.errorMsg'))}</p>
+        <button class="btn btn-primary ex-action" id="reframeRetry">${escapeHtml(t('reframe.tryAgain'))}</button>
+        ${reframeDisclaimer()}
+      </div>`;
+    $('#reframeRetry', stage).addEventListener('click', submitReframe);
+  }
+
+  async function submitReframe() {
+    const ta = $('#reframeInput');
+    const thought = (ta ? ta.value : reframeState.thought).trim();
+    reframeState.thought = thought;
+    if (!thought) {
+      const s = $('#reframeStatus');
+      if (s) { s.hidden = false; s.textContent = t('reframe.empty'); }
+      if (ta) ta.focus();
+      return;
+    }
+    reframeState.view = 'loading';
+    renderReframeView();
+    try {
+      const data = await api('/api/reframe', {
+        method: 'POST',
+        body: JSON.stringify({ thought, locale }), // only the thought + locale leave the client
+      });
+      const r = (data && data.result) || {};
+      if (r.needs_human_support) {
+        reframeState.view = 'crisis';
+        reframeState.data = null;
+      } else {
+        reframeState.view = 'result';
+        reframeState.data = r;
+        reframeState.saved = false;
+      }
+    } catch (err) {
+      reframeState.view = 'error';
+    }
+    renderReframeView();
+  }
+
+  // Optional local persistence — original thought + reframe only.
+  function saveReframe() {
+    try {
+      const KEY = 'mindarmor.reframes';
+      const list = JSON.parse(localStorage.getItem(KEY) || '[]');
+      list.unshift({
+        thought: reframeState.thought,
+        reframe: (reframeState.data || {}).reframe || '',
+        ts: Date.now(),
+      });
+      localStorage.setItem(KEY, JSON.stringify(list.slice(0, 50)));
+    } catch (_) { /* ignore quota / disabled storage */ }
+  }
+
   // ---------------------------------------------------------------------
   // Boot
   // ---------------------------------------------------------------------
@@ -1027,6 +1219,7 @@
     initStressForm();
     loadStress();
     renderResetKit();
+    renderReframe();
     renderVault();
   }
 

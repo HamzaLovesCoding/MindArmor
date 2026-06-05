@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const db = require('./db');
+const reframe = require('./reframe');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -123,6 +124,36 @@ app.get('/api/stress/stats', (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Guided Reframe (AI-powered CBT). Server-side proxy so the API key never
+// reaches the browser; only the single thought is sent to the model.
+// ---------------------------------------------------------------------------
+app.post('/api/reframe', async (req, res) => {
+  const { thought, locale } = req.body || {};
+  const text = typeof thought === 'string' ? thought.trim().slice(0, 500) : '';
+  if (!text) {
+    return res.status(400).json({ error: 'empty', message: 'A thought is required.' });
+  }
+  const loc = locale === 'es' ? 'es' : 'en';
+
+  // Crisis backstop runs before any model call — guarantees the crisis card
+  // even if the model misses it or no API key is configured.
+  if (reframe.isCrisisThought(text)) {
+    return res.json({ result: reframe.CRISIS_RESULT });
+  }
+
+  try {
+    const result = await reframe.generateReframe({ thought: text, locale: loc });
+    res.json({ result });
+  } catch (err) {
+    if (err && err.code === 'unavailable') {
+      return res.status(503).json({ error: 'unavailable' });
+    }
+    console.error('reframe error:', err && err.message ? err.message : err);
+    res.status(502).json({ error: 'api_error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Health check + SPA fallback
 // ---------------------------------------------------------------------------
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
@@ -131,6 +162,10 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`MindArmor running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`MindArmor running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

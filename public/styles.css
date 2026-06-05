@@ -514,6 +514,61 @@ body.modal-open { overflow: hidden; }
 .form-status.show { opacity: 1; transform: none; }
 .form-status.error { color: var(--bad); }
 
+/* ============================ Guided Reframe ============================ */
+.stress-right { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+.reframe-head { display: flex; gap: 14px; align-items: flex-start; }
+.reframe-icon {
+  width: 46px; height: 46px; border-radius: 12px; flex: none;
+  display: grid; place-items: center; font-size: 22px;
+  background: var(--bg-input); border: 1px solid var(--border);
+}
+.reframe-card .card-title { margin: 0; }
+.reframe-subtitle { margin: 3px 0 0; font-size: 13px; color: var(--text-faint); line-height: 1.45; }
+.reframe-body { color: var(--text-dim); font-size: 13.5px; line-height: 1.6; margin: 14px 0 16px; }
+.reframe-card .btn-block { margin-top: 0; }
+
+/* Modal views */
+.reframe-stage { max-width: 560px; }
+.reframe-view { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.reframe-view .ex-title { text-align: center; }
+.reframe-input { width: 100%; }
+.reframe-status { margin: 0; color: var(--bad); font-size: 13px; text-align: center; }
+.reframe-status[hidden] { display: none; }
+
+.reframe-loading { align-items: center; padding: 36px 0; }
+.reframe-spinner {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 3px solid var(--ring-track); border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .reframe-spinner { animation: none; } }
+
+.reframe-section { background: var(--bg-input); border: 1px solid var(--border); border-radius: 13px; padding: 16px 18px; }
+.reframe-section-title { margin: 0 0 8px; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent-2); }
+.reframe-section p { margin: 0; color: var(--text-dim); line-height: 1.6; font-size: 14px; }
+.reframe-distortion {
+  font-family: 'Sora'; font-weight: 700; font-size: 18px; margin-bottom: 6px; text-transform: capitalize;
+  background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.reframe-actions { display: flex; gap: 12px; margin-top: 4px; }
+.reframe-actions .btn { flex: 1; }
+.reframe-save {
+  background: none; border: none; color: var(--text-faint); text-decoration: underline;
+  font-family: inherit; font-size: 13px; cursor: pointer; padding: 4px; align-self: center;
+}
+.reframe-save:hover:not(:disabled) { color: var(--text-dim); }
+.reframe-save:disabled { color: var(--good); text-decoration: none; cursor: default; }
+
+.reframe-crisis, .reframe-error { align-items: center; text-align: center; }
+.reframe-crisis-body, .reframe-error-msg { margin: 0; color: var(--text-dim); line-height: 1.6; max-width: 420px; }
+.reframe-crisis-actions { display: flex; gap: 12px; width: 100%; max-width: 360px; }
+.reframe-crisis-actions .btn { flex: 1; text-decoration: none; }
+.reframe-reassure { margin: 0; color: var(--text-faint); font-size: 13.5px; }
+
+.reframe-disclaimer { margin: 4px 0 0; font-size: 12px; color: var(--text-faint); line-height: 1.5; text-align: center; }
+
 /* ============================ Scrollbar ============================ */
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
