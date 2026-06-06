@@ -72,8 +72,8 @@ starting so the server-side proxy can reach the Gemini API:
 
 ```bash
 export GEMINI_API_KEY=...
-# optional — defaults to gemini-2.5-flash
-export GEMINI_MODEL=gemini-2.5-flash
+# optional — defaults to gemini-2.0-flash
+export GEMINI_MODEL=gemini-2.0-flash
 npm start
 ```
 

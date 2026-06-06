@@ -2,9 +2,10 @@
 
 const { GoogleGenAI } = require('@google/genai');
 
-// Gemini 2.5 Flash is fast, free-tier friendly, and supports native JSON mode.
-// Override with GEMINI_MODEL if you want a different snapshot.
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+// Gemini 2.0 Flash is fast, free-tier friendly, and supports native JSON mode.
+// 2.5 Flash is also free-tier eligible but its endpoint gets congested often,
+// so we default to 2.0. Override with GEMINI_MODEL for a different snapshot.
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
 // Exact system prompt from the feature spec.
 const SYSTEM_PROMPT = `You are a CBT-trained reframing assistant inside a youth mental health app. The user will share one stressful thought. Your job is narrow and specific.
@@ -91,6 +92,15 @@ function getClient() {
   return client;
 }
 
+// Free-tier Gemini endpoints occasionally return 503 UNAVAILABLE during demand
+// spikes. A short retry with exponential backoff hides most of these from the
+// user without papering over real errors.
+function isTransient(err) {
+  const status = err && (err.status || err.code);
+  const msg = String((err && err.message) || '');
+  return status === 503 || /UNAVAILABLE|503/i.test(msg);
+}
+
 async function generateReframe({ thought, locale }) {
   const c = getClient();
   if (!c) {
@@ -98,7 +108,8 @@ async function generateReframe({ thought, locale }) {
     err.code = 'unavailable';
     throw err;
   }
-  const response = await c.models.generateContent({
+
+  const callOnce = () => c.models.generateContent({
     model: MODEL,
     contents: thought,
     config: {
@@ -110,6 +121,21 @@ async function generateReframe({ thought, locale }) {
       temperature: 0.4,
     },
   });
+
+  let response;
+  const delays = [400, 1200]; // ~1.6s total worst case before surfacing the error
+  for (let attempt = 0; ; attempt++) {
+    try {
+      response = await callOnce();
+      break;
+    } catch (err) {
+      if (attempt < delays.length && isTransient(err)) {
+        await new Promise((r) => setTimeout(r, delays[attempt]));
+        continue;
+      }
+      throw err;
+    }
+  }
 
   const text = response.text || '';
   return parseReframeJSON(text);
