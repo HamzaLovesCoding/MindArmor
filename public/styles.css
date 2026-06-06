@@ -298,22 +298,26 @@ textarea:focus, input:focus { outline: none; border-color: var(--accent); }
 .gradient-text { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 /* 2x2 on mobile (incl. 375px), 4-across on wider desktop. */
-.reset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-@media (min-width: 900px) { .reset-grid { grid-template-columns: repeat(4, 1fr); } }
+.reset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+@media (min-width: 900px) { .reset-grid { grid-template-columns: repeat(4, 1fr); gap: 28px; } }
 @media (max-width: 480px) {
-  .reset-card { padding: 22px 14px; gap: 8px; }
-  .reset-icon { width: 50px; height: 50px; font-size: 24px; margin-bottom: 2px; }
-  .reset-title { font-size: 15px; }
+  .reset-card { padding: 28px 16px; gap: 10px; min-height: 280px; }
+  .reset-icon { width: 64px; height: 64px; font-size: 30px; margin-bottom: 4px; }
+  .reset-title { font-size: 17px; }
+  .reset-desc { font-size: 14px; }
 }
 
-.reset-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 30px 22px; }
-.reset-icon {
-  width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; font-size: 28px;
-  background: var(--bg-input); border: 1px solid var(--border); margin-bottom: 4px;
+.reset-card {
+  text-align: center; display: flex; flex-direction: column; align-items: center;
+  gap: 16px; padding: 48px 28px; min-height: 380px;
 }
-.reset-title { margin: 0; font-size: 17px; }
-.reset-desc { margin: 0; color: var(--text-dim); font-size: 13.5px; line-height: 1.5; flex-grow: 1; }
-.reset-start { margin-top: 10px; width: 100%; }
+.reset-icon {
+  width: 88px; height: 88px; border-radius: 22px; display: grid; place-items: center; font-size: 40px;
+  background: var(--bg-input); border: 1px solid var(--border); margin-bottom: 8px;
+}
+.reset-title { margin: 0; font-size: 22px; }
+.reset-desc { margin: 0; color: var(--text-dim); font-size: 15px; line-height: 1.55; flex-grow: 1; }
+.reset-start { margin-top: 16px; width: 100%; padding-top: 14px; padding-bottom: 14px; font-size: 15px; }
 
 /* Contextual prompt shown in the Stress Tracker after a high-stress save */
 .reset-prompt { margin-top: 18px; text-align: center; }
