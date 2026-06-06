@@ -3,7 +3,7 @@
     "title": "MindArmor — Mental Health & Resilience",
     "description": "MindArmor — track your stress, reset with grounding & breathing tools, and explore support resources."
   },
-  "brand": { "name": "MindArmor", "tagline": "resilience, built daily" },
+  "brand": { "name": "MindArmor" },
   "nav": {
     "stress": "Stress Tracker",
     "reset": "Reset Kit",

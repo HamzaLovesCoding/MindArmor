@@ -3,7 +3,7 @@
     "title": "MindArmor — Salud mental y resiliencia",
     "description": "MindArmor — registra tu estrés, reinicia con herramientas de respiración y anclaje, y explora recursos de apoyo."
   },
-  "brand": { "name": "MindArmor", "tagline": "resiliencia, día a día" },
+  "brand": { "name": "MindArmor" },
   "nav": {
     "stress": "Registro de Estrés",
     "reset": "Kit de Calma",
