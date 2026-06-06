@@ -1,11 +1,10 @@
 'use strict';
 
-const Anthropic = require('@anthropic-ai/sdk');
+const { GoogleGenAI } = require('@google/genai');
 
-// The user named claude-sonnet-4-20250514, which is deprecated and retires
-// 2026-06-15. claude-sonnet-4-6 is the current Sonnet (same family, supported);
-// override with ANTHROPIC_MODEL if you really want the dated snapshot.
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
+// Gemini 2.5 Flash is fast, free-tier friendly, and supports native JSON mode.
+// Override with GEMINI_MODEL if you want a different snapshot.
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 // Exact system prompt from the feature spec.
 const SYSTEM_PROMPT = `You are a CBT-trained reframing assistant inside a youth mental health app. The user will share one stressful thought. Your job is narrow and specific.
@@ -86,8 +85,9 @@ function parseReframeJSON(raw) {
 // Lazily constructed so the app boots fine without a key configured.
 let client = null;
 function getClient() {
-  if (!process.env.ANTHROPIC_API_KEY) return null;
-  if (!client) client = new Anthropic(); // reads ANTHROPIC_API_KEY
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  if (!key) return null;
+  if (!client) client = new GoogleGenAI({ apiKey: key });
   return client;
 }
 
@@ -98,26 +98,20 @@ async function generateReframe({ thought, locale }) {
     err.code = 'unavailable';
     throw err;
   }
-  const msg = await c.messages.create({
+  const response = await c.models.generateContent({
     model: MODEL,
-    max_tokens: 1000,
-    // System prompt is the stable prefix — cache it (no-op if below the
-    // model's minimum cacheable size, but correct as the prompt grows).
-    system: [{ type: 'text', text: buildSystem(locale), cache_control: { type: 'ephemeral' } }],
-    thinking: { type: 'disabled' },
-    output_config: { effort: 'low' }, // fast, single-shot classification
-    messages: [{ role: 'user', content: thought }],
+    contents: thought,
+    config: {
+      systemInstruction: buildSystem(locale),
+      // Native JSON mode — Gemini guarantees the response is valid JSON.
+      responseMimeType: 'application/json',
+      maxOutputTokens: 1000,
+      // Low temperature for consistent CBT-style structured output.
+      temperature: 0.4,
+    },
   });
 
-  if (msg.stop_reason === 'refusal') {
-    const err = new Error('Request was refused.');
-    err.code = 'api_error';
-    throw err;
-  }
-  const text = (msg.content || [])
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('');
+  const text = response.text || '';
   return parseReframeJSON(text);
 }
 
