@@ -20,8 +20,8 @@ support — all in one calm, focused interface.
   assistant names the cognitive distortion, explains how it misleads, offers a
   balanced reframe in your voice, and suggests one small action. If the thought
   signals crisis, it replaces the reframe with crisis resources (988 / 741741).
-  Powered by the Gemini API **server-side** (the key never reaches the browser);
-  works in English and Spanish. Requires `GEMINI_API_KEY` (see below) — without
+  Powered by the Claude API **server-side** (the key never reaches the browser);
+  works in English and Spanish. Requires `ANTHROPIC_API_KEY` (see below) — without
   it the rest of the app is unaffected and the tool degrades gracefully.
 
 ### 🌬️ Reset Kit
@@ -66,14 +66,13 @@ Then open **http://localhost:3000** in your browser. Press **Ctrl + C** to stop.
 - Set a custom port with `PORT=4000 npm start`.
 - Run with auto-reload during development: `npm run dev`.
 
-**Guided Reframe (AI) setup.** Get a free key from
-[Google AI Studio](https://aistudio.google.com/apikey) and export it before
-starting so the server-side proxy can reach the Gemini API:
+**Guided Reframe (AI) setup.** Export an Anthropic API key before starting so the
+server-side proxy can reach the Claude API:
 
 ```bash
-export GEMINI_API_KEY=...
-# optional — defaults to gemini-2.0-flash
-export GEMINI_MODEL=gemini-2.0-flash
+export ANTHROPIC_API_KEY=sk-ant-...
+# optional — defaults to claude-sonnet-4-6
+export ANTHROPIC_MODEL=claude-sonnet-4-6
 npm start
 ```
 
