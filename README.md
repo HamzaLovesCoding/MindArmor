@@ -100,39 +100,54 @@ open it from the **Ports** tab. (Logs at `/tmp/mindarmor.log`.)
 
 | Layer     | Choice |
 |-----------|--------|
-| Backend   | Node.js + Express |
-| Database  | SQLite (`better-sqlite3`, WAL mode) |
-| Frontend  | Vanilla HTML/CSS/JS (no build step) |
+| Hosting   | Vercel — static `public/` + one serverless function (`api/reframe.js`) |
+| Local dev | Node.js + Express (`server.js`) |
+| Storage   | Browser `localStorage` (stress check-ins) — no database |
+| Frontend  | Vanilla HTML/CSS/JS (no build step besides i18n bundling) |
 
 ### Project structure
 
 ```
 MindArmor/
-├── server.js          # Express server + REST API
-├── db.js              # SQLite schema + data access layer
-├── reframe.js         # Guided Reframe — Claude API call, crisis backstop, JSON parse
+├── api/
+│   └── reframe.js     # Vercel serverless function — Guided Reframe proxy
+├── server.js          # Local dev server (mirrors the production routes)
+├── reframe.js         # Shared Claude API call, crisis backstop, JSON parse
 ├── messages/          # i18n bundles (en.json, es.json)
+├── scripts/
+│   └── build-messages.js  # Bundles messages/*.json into public/messages.js
 ├── public/
 │   ├── index.html     # Dashboard shell (sidebar + 3 tabs)
 │   ├── styles.css     # Dark-mode design system
 │   ├── data.js        # Reset Kit, resources content & crisis info
+│   ├── stressStore.js # localStorage CRUD for stress check-ins
 │   └── app.js         # All client-side interactivity
-└── data/              # SQLite database (gitignored, auto-created)
+└── vercel.json        # Vercel build + output config
 ```
 
 ### API
 
-| Method | Endpoint               | Purpose |
-|--------|------------------------|---------|
-| `GET`  | `/api/stress`          | List check-ins |
-| `POST` | `/api/stress`          | Create a check-in |
-| `DELETE` | `/api/stress/:id`    | Delete a check-in |
-| `GET`  | `/api/stress/stats`    | Aggregate stats (avg, streak, top habit) |
-| `POST` | `/api/reframe`         | Guided Reframe — proxies one thought to the Claude API, returns structured CBT JSON |
+| Method | Endpoint        | Purpose |
+|--------|-----------------|---------|
+| `POST` | `/api/reframe`  | Guided Reframe — proxies one thought to the Claude API, returns structured CBT JSON |
 
-> The Reset Kit is client-only — it has no API and persists nothing.
-> `/api/reframe` sends **only** the single thought (plus locale) to the model —
-> no check-in history, name, or other data — and the API key lives only on the server.
+Stress check-ins live entirely in the browser (`localStorage`) — there is no
+server-side stress API. The Reset Kit is client-only too.
+`/api/reframe` sends **only** the single thought (plus locale) to the model —
+no check-in history, name, or other data — and the API key lives only on the server.
+
+---
+
+## ☁️ Deploying to Vercel
+
+1. Push to GitHub and import the repo at [vercel.com](https://vercel.com/new).
+2. Vercel auto-detects the config in `vercel.json` (build command + `public/`
+   as the static output) and deploys `api/reframe.js` as a serverless function.
+3. In **Project Settings → Environment Variables**, add
+   `ANTHROPIC_API_KEY` (and optionally `ANTHROPIC_MODEL`). Redeploy.
+
+Without the API key the app still loads — the Guided Reframe just returns a
+"couldn't reach the assistant" message.
 
 ---
 

@@ -264,10 +264,10 @@
     }).join('');
 
     $$('.feed-del', feed).forEach((btn) => {
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', () => {
         const id = btn.closest('.feed-item').dataset.id;
         try {
-          await api(`/api/stress/${id}`, { method: 'DELETE' });
+          window.MindArmorStore.removeEntry(id);
           notify(t('stress.removed'));
           loadStress();
         } catch (err) {
@@ -277,23 +277,21 @@
     });
   }
 
-  async function renderStats() {
-    try {
-      const s = await api('/api/stress/stats');
-      const set = (k, v) => { const el = $(`[data-stat="${k}"]`); if (el) el.textContent = v; };
-      set('count', Number(s.count).toLocaleString(locale));
-      set('avg', s.avgStress == null ? '—' : Number(s.avgStress).toLocaleString(locale));
-      const streakWord = s.currentStreak === 1 ? t('stress.streakDay') : t('stress.streakDays');
-      set('streak', `${s.currentStreak} ${streakWord}`);
-      // Top habit is shown as its emoji (language-neutral).
-      const top = s.topActivity ? (D.activities.find((a) => a.key === s.topActivity) || {}).emoji : null;
-      set('top', top || '—');
-    } catch (_) { /* non-critical */ }
+  function renderStats() {
+    const s = window.MindArmorStore.getStats();
+    const set = (k, v) => { const el = $(`[data-stat="${k}"]`); if (el) el.textContent = v; };
+    set('count', Number(s.count).toLocaleString(locale));
+    set('avg', s.avgStress == null ? '—' : Number(s.avgStress).toLocaleString(locale));
+    const streakWord = s.currentStreak === 1 ? t('stress.streakDay') : t('stress.streakDays');
+    set('streak', `${s.currentStreak} ${streakWord}`);
+    // Top habit is shown as its emoji (language-neutral).
+    const top = s.topActivity ? (D.activities.find((a) => a.key === s.topActivity) || {}).emoji : null;
+    set('top', top || '—');
   }
 
-  async function loadStress() {
+  function loadStress() {
     try {
-      const { entries } = await api('/api/stress');
+      const entries = window.MindArmorStore.listEntries();
       renderFeed(entries);
       renderStats();
     } catch (err) {
@@ -318,10 +316,7 @@
       const mood = selectedMood();
       const note = $('#note').value.trim();
       try {
-        await api('/api/stress', {
-          method: 'POST',
-          body: JSON.stringify({ stressLevel, activities, mood, note }),
-        });
+        window.MindArmorStore.addEntry({ stressLevel, activities, mood, note });
         // Reset form
         $$('#activityGrid .activity-chip').forEach((c) => {
           c.classList.remove('checked');
