@@ -342,7 +342,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--accent); }
 /* Fullscreen exercise overlay */
 body.modal-open { overflow: hidden; }
 .exercise-overlay {
-  position: fixed; inset: 0; z-index: 200;
+  position: fixed; inset: 0; z-index: 200; overflow-y: auto;
   display: flex; align-items: center; justify-content: center; padding: 28px;
   background: radial-gradient(1100px 760px at 50% 0%, rgba(124, 92, 255, 0.14), transparent 60%), rgba(6, 9, 18, 0.93);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
@@ -355,91 +355,92 @@ body.modal-open { overflow: hidden; }
   font-size: 17px; cursor: pointer; transition: all 0.16s; z-index: 2;
 }
 .exercise-close:hover { border-color: var(--accent); color: #fff; }
-.exercise-stage { width: 100%; max-width: 460px; }
+.exercise-stage { width: 100%; max-width: 640px; }
 
-.ex { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
-.ex-title { margin: 0; font-size: 22px; }
-.ex-action { min-width: 168px; }
-.ex-nav { display: flex; gap: 12px; width: 100%; max-width: 340px; }
+.ex { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 26px; }
+.ex-title { margin: 0; font-size: 30px; }
+.ex-action { min-width: 200px; }
+.ex-nav { display: flex; gap: 14px; width: 100%; max-width: 440px; }
 .ex-nav .btn { flex: 1; }
-.ex-done { gap: 16px; }
-.ex-done-emoji { font-size: 54px; }
+.ex-done { gap: 20px; }
+.ex-done-emoji { font-size: 72px; }
 
 /* Box Breathing */
-.box-wrap { display: grid; place-items: center; height: 250px; }
-@media (min-width: 768px) { .box-wrap { height: 330px; } }
+.box-wrap { display: grid; place-items: center; height: 340px; }
+@media (min-width: 768px) { .box-wrap { height: 440px; } }
 .box-square {
-  width: 200px; height: 200px; border-radius: 26px; display: grid; place-items: center;
-  border: 4px solid transparent;
+  width: 280px; height: 280px; border-radius: 30px; display: grid; place-items: center;
+  border: 5px solid transparent;
   background: linear-gradient(var(--bg-elev), var(--bg-elev)) padding-box, var(--accent-grad) border-box;
-  box-shadow: 0 0 50px -14px rgba(124, 92, 255, 0.6); will-change: transform;
+  box-shadow: 0 0 60px -14px rgba(124, 92, 255, 0.6); will-change: transform;
 }
-@media (min-width: 768px) { .box-square { width: 280px; height: 280px; } }
+@media (min-width: 768px) { .box-square { width: 380px; height: 380px; } }
 .box-square.static { transform: none !important; }
-.box-phase { font-family: 'Sora'; font-weight: 700; font-size: 19px; }
+.box-phase { font-family: 'Sora'; font-weight: 700; font-size: 26px; }
 
-.box-bar { width: 100%; max-width: 320px; height: 10px; background: var(--ring-track); border-radius: 99px; overflow: hidden; }
+.box-bar { width: 100%; max-width: 440px; height: 12px; background: var(--ring-track); border-radius: 99px; overflow: hidden; }
 .box-bar[hidden] { display: none; }
 .box-bar-fill { height: 100%; width: 0%; background: var(--accent-grad); border-radius: 99px; transition: width 0.2s linear; }
 
-.ex-counter { display: flex; align-items: center; gap: 16px; font-weight: 600; font-size: 14.5px; }
+.ex-counter { display: flex; align-items: center; gap: 20px; font-weight: 600; font-size: 17px; }
 .counter-btn {
-  width: 34px; height: 34px; border-radius: 10px; font-size: 18px; cursor: pointer; line-height: 1;
+  width: 42px; height: 42px; border-radius: 12px; font-size: 22px; cursor: pointer; line-height: 1;
   background: var(--bg-input); border: 1px solid var(--border); color: var(--text); transition: all 0.16s;
 }
 .counter-btn:hover:not(:disabled) { border-color: var(--accent); }
 .counter-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* 5-4-3-2-1 Grounding */
-.ground-dots { display: flex; gap: 10px; }
-.ground-dots .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ring-track); transition: all 0.2s; }
+.ground-dots { display: flex; gap: 14px; }
+.ground-dots .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--ring-track); transition: all 0.2s; }
 .ground-dots .dot.done { background: var(--accent-2); }
-.ground-dots .dot.active { background: transparent; box-shadow: 0 0 0 2px var(--accent); transform: scale(1.2); }
-.ground-number { font-family: 'Sora'; font-size: 76px; font-weight: 800; line-height: 1; }
-.ground-prompt { margin: 0; font-size: 18px; }
+.ground-dots .dot.active { background: transparent; box-shadow: 0 0 0 3px var(--accent); transform: scale(1.2); }
+.ground-number { font-family: 'Sora'; font-size: 108px; font-weight: 800; line-height: 1; }
+.ground-prompt { margin: 0; font-size: 24px; }
 .ground-prompt strong { color: var(--accent-2); }
-.ground-input { width: 100%; max-width: 360px; text-align: left; }
+.ground-input { width: 100%; max-width: 460px; text-align: left; }
 
 /* Progressive Muscle Relaxation */
-.pmr-ring { position: relative; width: 150px; height: 150px; }
+.pmr-ring { position: relative; width: 220px; height: 220px; }
+.pmr-ring svg { width: 100%; height: 100%; display: block; }
 .pmr-center { position: absolute; inset: 0; display: grid; place-items: center; }
-.pmr-center span { font-family: 'Sora'; font-size: 40px; font-weight: 800; }
-.pmr-region { font-family: 'Sora'; font-size: 30px; font-weight: 800; text-transform: capitalize; }
-.pmr-action { font-size: 16px; color: var(--text-dim); margin-top: -10px; }
+.pmr-center span { font-family: 'Sora'; font-size: 56px; font-weight: 800; }
+.pmr-region { font-family: 'Sora'; font-size: 40px; font-weight: 800; text-transform: capitalize; }
+.pmr-action { font-size: 20px; color: var(--text-dim); margin-top: -10px; }
 
 /* Urge Surfing */
 .ex-urge { width: 100%; }
-.ex-urge .slider, .ex-urge .slider-scale, .urge-strength-label { width: 100%; max-width: 360px; }
-.urge-emoji { font-size: 52px; }
-.urge-body { color: var(--text-dim); line-height: 1.6; font-size: 15px; max-width: 380px; margin: 0; }
-.urge-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.ex-urge .slider, .ex-urge .slider-scale, .urge-strength-label { width: 100%; max-width: 460px; }
+.urge-emoji { font-size: 68px; }
+.urge-body { color: var(--text-dim); line-height: 1.6; font-size: 18px; max-width: 480px; margin: 0; }
+.urge-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
 .urge-chip { user-select: none; }
 .urge-strength-label { justify-content: center; gap: 8px; margin: 4px 0 0; }
 
 .urge-wave-wrap {
-  position: relative; width: 100%; max-width: 380px; height: 200px;
-  border-radius: 16px; overflow: hidden;
+  position: relative; width: 100%; max-width: 520px; height: 280px;
+  border-radius: 18px; overflow: hidden;
   background: var(--bg-input); border: 1px solid var(--border);
 }
 .urge-wave-svg { width: 100%; height: 100%; display: block; }
 .urge-countdown {
-  position: absolute; top: 10px; right: 12px; z-index: 1;
-  font-family: 'Sora'; font-weight: 700; font-size: 15px; color: var(--text);
-  background: rgba(10, 14, 26, 0.6); padding: 2px 9px; border-radius: 8px;
+  position: absolute; top: 12px; right: 14px; z-index: 1;
+  font-family: 'Sora'; font-weight: 700; font-size: 18px; color: var(--text);
+  background: rgba(10, 14, 26, 0.6); padding: 3px 11px; border-radius: 9px;
 }
-.urge-countdown-big { font-family: 'Sora'; font-weight: 800; font-size: 46px; }
-.urge-bar { width: 100%; max-width: 380px; height: 14px; background: var(--ring-track); border-radius: 99px; overflow: hidden; }
+.urge-countdown-big { font-family: 'Sora'; font-weight: 800; font-size: 60px; }
+.urge-bar { width: 100%; max-width: 520px; height: 16px; background: var(--ring-track); border-radius: 99px; overflow: hidden; }
 .urge-bar-fill { height: 100%; width: 0%; background: var(--accent-grad); border-radius: 99px; }
-.urge-phase { margin: 0; font-size: 16px; font-weight: 600; }
+.urge-phase { margin: 0; font-size: 20px; font-weight: 600; }
 .ex-nav-row { display: flex; align-items: center; gap: 16px; }
 .btn-skip {
   background: none; border: none; color: var(--text-faint); font-family: inherit;
-  font-size: 13px; cursor: pointer; text-decoration: underline; padding: 6px 8px;
+  font-size: 14px; cursor: pointer; text-decoration: underline; padding: 6px 8px;
 }
 .btn-skip:hover { color: var(--text-dim); }
-.urge-now { font-family: 'Sora'; font-size: 60px; font-weight: 800; line-height: 1; }
-.urge-compare { margin: 0; color: var(--text-dim); font-size: 14px; }
-.urge-closing { margin: 0; font-size: 16px; font-weight: 600; }
+.urge-now { font-family: 'Sora'; font-size: 80px; font-weight: 800; line-height: 1; }
+.urge-compare { margin: 0; color: var(--text-dim); font-size: 17px; }
+.urge-closing { margin: 0; font-size: 20px; font-weight: 600; }
 
 /* ============================ Emergency Hub ============================ */
 .emergency-hub {
