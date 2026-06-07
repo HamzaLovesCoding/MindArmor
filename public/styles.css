@@ -300,9 +300,9 @@ textarea:focus, input:focus { outline: none; border-color: var(--accent); }
 /* Reset Kit panel fills the available viewport height so the cards span the page. */
 #tab-reset.active { display: flex; flex-direction: column; min-height: calc(100vh - 102px); }
 
-/* 2x2 on mobile (incl. 375px), 4-across on wider desktop. */
+/* Always a 2x2 grid — two cards on top, two on bottom. */
 .reset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; flex: 1; }
-@media (min-width: 900px) { .reset-grid { grid-template-columns: repeat(4, 1fr); gap: 28px; } }
+@media (min-width: 900px) { .reset-grid { gap: 28px; } }
 @media (max-width: 480px) {
   .reset-card { padding: 28px 16px; gap: 12px; }
   .reset-icon { width: 64px; height: 64px; font-size: 30px; margin-bottom: 4px; }
